@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#8a6318">
+<title>Tạo Lịch Làm Việc Phòng Khám</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800;900&family=Cormorant+Garamond:ital,wght@0,600;1,600&family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root{
+    --p1:#8a6318;   /* deep primary */
+    --p2:#b8892f;   /* mid primary */
+    --p3:#e8c979;   /* light accent */
+    --p2-rgb:184,137,47;
+    --ink:#4a3115;
+    --bg:#fbf5e8;
+    --bg2:#fffdf8;
+    --hi:#e3ecda;      /* highlight bg for off-day columns */
+    --hi-line:#b9cfa4;
+    --red:#b5342a;
+    --text-dark:#2c2418;
+    --text-mute:#8a7f68;
+    --panel-line:#e7e1d3;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;
+    font-family:'Be Vietnam Pro', sans-serif;
+    background:#eee7d8;
+    color:var(--text-dark);
+    overflow-x:hidden;
+    width:100%;
+  }
+  .app{
+    display:grid;
+    grid-template-columns: 430px 1fr;
+    min-height:100vh;
+    min-height:100dvh;
+  }
+
+  /* ---- Mobile top nav (hidden on desktop) ---- */
+  .mobile-nav{
+    display:none;
+    position:sticky;
+    top:0;
+    z-index:50;
+    background:linear-gradient(135deg,var(--p2),var(--p1));
+    padding:10px 14px;
+    padding-top:calc(10px + env(safe-area-inset-top));
+    gap:8px;
+    align-items:center;
+    box-shadow:0 2px 10px rgba(0,0,0,.15);
+  }
+  .mobile-nav .mn-title{
+    color:#fff;font-weight:800;font-size:13px;flex:1;
+    font-family:'Playfair Display',serif;letter-spacing:.02em;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .mobile-nav button{
+    border:none;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;
+    background:rgba(255,255,255,.18);color:#fff;cursor:pointer;white-space:nowrap;
+    font-family:inherit;
+  }
+  .mobile-nav button.active{background:#fff;color:var(--p1);}
+
+  /* ---- Mobile floating export button ---- */
+  .fab-export{
+    display:none;
+    position:fixed;
+    right:16px;
+    bottom:calc(16px + env(safe-area-inset-bottom));
+    z-index:60;
+    width:56px;height:56px;
+    border-radius:50%;
+    border:none;
+    background:linear-gradient(135deg,var(--p2),var(--p1));
+    color:#fff;
+    font-size:22px;
+    box-shadow:0 8px 20px rgba(0,0,0,.28);
+    align-items:center;justify-content:center;
+    cursor:pointer;
+  }
+
+  /* ============ LEFT: CONTROL PANEL ============ */
+  .panel{
+    background:#fff;
+    border-right:1px solid var(--panel-line);
+    padding:28px 26px 40px;
+    overflow-y:auto;
+    max-height:100vh;
+    max-height:100dvh;
+  }
+  .brandmark{display:flex;align-items:center;gap:10px;margin-bottom:20px;}
+  .brandmark .dot{width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,var(--p2),var(--p1));}
+  .brandmark span{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-mute);font-weight:700;}
+  h1.title{font-family:'Playfair Display', serif;font-size:22px;margin:0 0 6px;color:var(--ink);}
+  .sub{font-size:13px;color:var(--text-mute);margin:0 0 24px;line-height:1.55;}
+
+  .section{margin-bottom:0;border:1px solid var(--panel-line);border-radius:12px;overflow:hidden;background:var(--bg2);}
+  .section + .section{margin-top:14px;}
+  .section-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:linear-gradient(180deg,#fbf7ea,#f5eed9);cursor:pointer;user-select:none;border-bottom:1px solid var(--panel-line);}
+  .section-head h2{font-size:13.5px;margin:0;letter-spacing:.03em;color:var(--ink);font-weight:700;display:flex;align-items:center;gap:9px;}
+  .section-head h2 .num{width:21px;height:21px;border-radius:50%;background:var(--p2);color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;}
+  .chev{transition:transform .2s ease;color:var(--text-mute);font-size:12px;}
+  .section.collapsed .chev{transform:rotate(-90deg);}
+  .section-body{padding:16px;display:flex;flex-direction:column;gap:14px;}
+  .section.collapsed .section-body{display:none;}
+
+  label{font-size:12px;font-weight:600;color:var(--ink);display:block;margin-bottom:5px;}
+  input[type=text], input[type=tel], textarea, select{
+    width:100%;padding:9px 11px;border:1px solid #ddd2b3;border-radius:8px;
+    font-family:inherit;font-size:13.5px;background:#fffdf9;color:var(--text-dark);
+  }
+  input:focus, textarea:focus, select:focus{outline:none;border-color:var(--p2);box-shadow:0 0 0 3px rgba(var(--p2-rgb),.15);}
+  .field{display:flex;flex-direction:column;}
+  .field .opt{font-weight:400;color:var(--text-mute);font-size:10.5px;}
+
+  /* theme swatches */
+  .theme-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+  .theme-swatch{cursor:pointer;border:2px solid transparent;border-radius:10px;padding:6px;text-align:center;transition:border-color .15s ease, transform .1s ease;background:#fff;}
+  .theme-swatch:hover{transform:translateY(-2px);}
+  .theme-swatch.active{border-color:var(--p2);box-shadow:0 2px 8px rgba(0,0,0,.08);}
+  .theme-swatch .chip-preview{height:34px;border-radius:7px;margin-bottom:6px;}
+  .theme-swatch .chip-name{font-size:10px;color:var(--text-mute);font-weight:700;}
+
+  .logo-upload{display:flex;align-items:center;gap:14px;}
+  .logo-preview{width:64px;height:64px;border-radius:50%;border:2px solid var(--p3);object-fit:cover;background:#f6f0de;flex-shrink:0;}
+  .btn{border:none;cursor:pointer;font-family:inherit;font-weight:600;border-radius:8px;padding:9px 14px;font-size:12.5px;transition:transform .1s ease, box-shadow .15s ease;}
+  .btn:active{transform:scale(.97);}
+  .btn-outline{background:#fff;border:1px solid var(--p2);color:var(--p1);}
+  .btn-outline:hover{background:#fbf3df;}
+  .btn-ghost{background:transparent;color:#a44;border:1px solid #ecd7d4;}
+  .btn-ghost:hover{background:#fbeeec;}
+  .btn-gold{background:linear-gradient(135deg,var(--p2),var(--p1));color:#fff;box-shadow:0 4px 12px rgba(var(--p2-rgb),.32);}
+  .btn-gold:hover{box-shadow:0 6px 16px rgba(var(--p2-rgb),.42);}
+
+  .phone-row{display:flex;gap:8px;align-items:center;}
+  .phone-row input{flex:1;}
+  .icon-btn{width:32px;height:32px;border-radius:7px;border:1px solid #ecd7d4;background:#fff;color:#a44;cursor:pointer;font-size:15px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+  .icon-btn:hover{background:#fbeeec;}
+  .add-link{align-self:flex-start;background:transparent;border:none;color:var(--p1);font-weight:700;font-size:12.5px;cursor:pointer;padding:4px 0;}
+  .add-link:hover{text-decoration:underline;}
+
+  .doctor-card{border:1px solid var(--panel-line);border-radius:10px;background:#fff;padding:12px;display:flex;flex-direction:column;gap:10px;}
+  .doctor-card + .doctor-card{margin-top:10px;}
+  .doctor-card-head{display:flex;justify-content:space-between;align-items:center;}
+  .doctor-card-head .tag{font-size:11px;font-weight:700;color:var(--p1);background:#fbf1da;padding:3px 9px;border-radius:20px;}
+  .days-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
+  .day-field{display:flex;flex-direction:column;gap:3px;}
+  .day-field span{font-size:9.5px;text-align:center;color:var(--text-mute);font-weight:700;text-transform:uppercase;}
+  .day-field input{padding:6px 4px;text-align:center;font-size:11px;border-radius:6px;}
+  .day-field.off input{background:#f3ede0;color:var(--text-mute);}
+  .quick-off{display:flex;gap:6px;flex-wrap:wrap;}
+  .chip{font-size:10.5px;padding:4px 9px;border-radius:20px;border:1px solid #ddd2b3;background:#fff;cursor:pointer;color:var(--text-mute);font-weight:600;}
+  .chip:hover{border-color:var(--p2);color:var(--p1);}
+
+  .hint{font-size:11.5px;color:var(--text-mute);line-height:1.5;margin:0;}
+
+  .export-zone{position:sticky;bottom:-40px;margin-top:24px;padding-top:16px;display:flex;flex-direction:column;gap:10px;}
+  .export-zone .btn-gold{width:100%;padding:14px;font-size:14px;letter-spacing:.02em;min-height:48px;}
+  .status-msg{font-size:12px;text-align:center;color:var(--p1);margin-top:0;min-height:16px;font-weight:600;}
+
+  /* ============ RIGHT: PREVIEW STAGE ============ */
+  .stage{background:radial-gradient(circle at 20% 15%, #efe6cf 0%, transparent 45%), #eee7d8;padding:48px;display:flex;align-items:flex-start;justify-content:center;overflow:auto;}
+  .stage-inner{display:flex;flex-direction:column;align-items:center;gap:16px;width:100%;}
+  .stage-label{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#a99b78;font-weight:700;}
+  .poster-scale-wrapper{
+    width:100%;
+    display:flex;
+    justify-content:center;
+    overflow:hidden;
+  }
+  .poster-scale-wrapper #poster-outer{
+    transform-origin:top center;
+    flex-shrink:0;
+  }
+
+  /* ---- POSTER ---- */
+  #poster-outer{
+    width:920px;
+    background:var(--bg);
+    box-shadow:0 34px 70px -22px rgba(74,49,21,.42), 0 3px 10px rgba(74,49,21,.16);
+    position:relative;
+    padding:16px;
+  }
+  #poster{
+    position:relative;
+    background:
+      radial-gradient(circle, rgba(var(--p2-rgb),.09) 1.1px, transparent 1.1px) 0 0/20px 20px,
+      var(--bg);
+    border:1.5px solid var(--p3);
+    padding:38px 46px 32px;
+    overflow:hidden;
+  }
+  /* ornamental corners */
+  .corner{position:absolute;width:30px;height:30px;pointer-events:none;}
+  .corner::before, .corner::after{content:"";position:absolute;background:var(--p2);}
+  .corner.tl{top:8px;left:8px;}
+  .corner.tr{top:8px;right:8px;transform:scaleX(-1);}
+  .corner.bl{bottom:8px;left:8px;transform:scaleY(-1);}
+  .corner.br{bottom:8px;right:8px;transform:scale(-1,-1);}
+  .corner::before{top:0;left:0;width:100%;height:2px;}
+  .corner::after{top:0;left:0;width:2px;height:100%;}
+  .corner-dot{position:absolute;width:6px;height:6px;background:var(--p2);border-radius:50%;}
+  .corner.tl .corner-dot{top:-3px;left:-3px;}
+  .corner.tr .corner-dot{top:-3px;left:-3px;}
+  .corner.bl .corner-dot{top:-3px;left:-3px;}
+  .corner.br .corner-dot{top:-3px;left:-3px;}
+
+  .poster-header{display:flex;align-items:flex-start;gap:24px;padding-bottom:18px;position:relative;z-index:1;}
+  .logo-ring{width:104px;height:104px;border-radius:50%;flex-shrink:0;padding:4px;background:conic-gradient(from 180deg, var(--p3), var(--p2), var(--p3));display:flex;align-items:center;justify-content:center;}
+  .logo-ring-inner{width:100%;height:100%;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;border:2px solid #fff;}
+  .poster-logo{width:100%;height:100%;object-fit:cover;}
+  .poster-logo.placeholder-text{font-family:'Playfair Display',serif;font-weight:700;font-size:24px;color:var(--p2);}
+
+  .poster-headtext{flex:1;padding-top:2px;}
+  .clinic-line1{font-size:15px;font-weight:700;color:var(--p1);letter-spacing:.03em;text-transform:uppercase;margin:0 0 2px;}
+  .clinic-line1 .accent{font-family:'Playfair Display',serif;font-size:27px;font-weight:900;color:var(--red);text-transform:uppercase;letter-spacing:0;margin-left:7px;}
+  .clinic-doctor{font-family:'Playfair Display',serif;font-size:23px;font-weight:800;color:var(--ink);margin:2px 0 3px;text-transform:uppercase;}
+  .clinic-hospital{font-size:13px;font-weight:700;color:var(--text-mute);margin:0 0 6px;}
+  .clinic-tagline{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:14.5px;color:var(--p1);margin:0 0 9px;}
+  .clinic-meta{display:flex;flex-direction:column;gap:4px;}
+  .meta-row{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--text-dark);}
+  .meta-row svg{width:13px;height:13px;fill:var(--p1);flex-shrink:0;}
+  .clinic-phones{display:flex;gap:22px;flex-wrap:wrap;}
+  .clinic-phones .phone-item{display:flex;align-items:center;gap:6px;font-size:12.5px;}
+  .clinic-phones svg{width:13px;height:13px;fill:var(--p1);flex-shrink:0;}
+  .clinic-phones b{color:var(--ink);}
+
+  .divider{display:flex;align-items:center;gap:0;margin:6px 0 16px;position:relative;z-index:1;}
+  .divider-line{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--p2),transparent);}
+  .divider-diamond{width:9px;height:9px;background:var(--p2);transform:rotate(45deg);margin:0 12px;flex-shrink:0;}
+
+  .poster-schedule-title{text-align:center;font-family:'Playfair Display',serif;font-weight:900;font-size:33px;color:var(--red);letter-spacing:.04em;margin:0 0 20px;text-transform:uppercase;position:relative;z-index:1;}
+
+  .table-wrap{border-radius:12px;overflow:hidden;border:1.5px solid var(--p2);box-shadow:0 8px 22px -12px rgba(74,49,21,.35);position:relative;z-index:1;}
+  table.schedule{width:100%;border-collapse:collapse;table-layout:fixed;}
+  table.schedule th, table.schedule td{border:1px solid rgba(var(--p2-rgb),.35);padding:12px 6px;text-align:center;font-size:13px;}
+  table.schedule thead th{font-weight:700;color:#fff;background:linear-gradient(160deg,var(--p2),var(--p1));font-style:italic;font-size:13px;border-color:rgba(255,255,255,.25);}
+  table.schedule thead th.first-col{background:linear-gradient(160deg,var(--p1),var(--ink));}
+  table.schedule thead th.off-col{background:linear-gradient(160deg,#7c9a63,#5a7a3f);color:#fff;font-weight:800;font-style:normal;}
+  table.schedule tbody tr:nth-child(odd) td, table.schedule tbody tr:nth-child(odd) th{background:#fffdf9;}
+  table.schedule tbody tr:nth-child(even) td, table.schedule tbody tr:nth-child(even) th{background:#faf4e6;}
+  table.schedule tbody th{
+    font-weight:800;color:#fff;font-size:12.5px;white-space:pre-line;
+    background:linear-gradient(160deg,var(--p2),var(--p1)) !important;
+  }
+  table.schedule tbody td{color:var(--text-dark);font-weight:600;white-space:pre-line;}
+  table.schedule tbody td.off-col{background:var(--hi) !important;}
+  .pill-off{display:inline-block;background:rgba(181,52,42,.13);color:var(--red);font-weight:800;padding:4px 12px;border-radius:20px;font-size:12px;letter-spacing:.02em;}
+
+  .poster-footer-wrap{margin-top:24px;display:flex;justify-content:center;position:relative;z-index:1;}
+  .poster-footer{
+    position:relative;
+    background:linear-gradient(120deg,var(--p1),var(--p2));
+    color:#fff;font-weight:800;font-size:13.5px;letter-spacing:.03em;text-transform:uppercase;
+    padding:11px 34px;border-radius:6px;
+    clip-path:polygon(2.5% 0,97.5% 0,100% 50%,97.5% 100%,2.5% 100%,0 50%);
+    display:flex;align-items:center;gap:9px;
+    box-shadow:0 8px 18px -8px rgba(74,49,21,.5);
+  }
+  .poster-footer svg{width:15px;height:15px;fill:#fff;flex-shrink:0;}
+
+  /* ================= RESPONSIVE ================= */
+
+  /* Tablet & below: stack panel above preview, show mobile nav + FAB */
+  @media (max-width: 1050px){
+    .app{grid-template-columns:1fr;}
+    .panel{max-height:none;border-right:none;border-bottom:1px solid var(--panel-line);}
+    .export-zone{position:static;bottom:auto;}
+    .mobile-nav{display:flex;}
+    .fab-export{display:flex;}
+    .stage{padding:28px 16px calc(100px + env(safe-area-inset-bottom));}
+    .panel{padding-bottom:24px;scroll-margin-top:56px;}
+    .stage{scroll-margin-top:56px;}
+  }
+
+  /* Phones and small tablets */
+  @media (max-width: 720px){
+    .panel{padding:20px 18px 24px;}
+    h1.title{font-size:19px;}
+    .sub{font-size:12.5px;margin-bottom:18px;}
+    .section-body{padding:14px;gap:12px;}
+    .theme-grid{grid-template-columns:repeat(4,1fr);gap:8px;}
+    .stage{padding:20px 10px calc(96px + env(safe-area-inset-bottom));}
+    /* Prevent iOS auto-zoom on focus: inputs need >=16px font */
+    input[type=text], input[type=tel], textarea, select{font-size:16px;padding:10px 11px;}
+    .day-field input{font-size:13px;padding:8px 4px;}
+    .icon-btn{width:38px;height:38px;font-size:16px;}
+    .btn{padding:11px 14px;font-size:13px;}
+    .chip{padding:6px 11px;font-size:11px;}
+  }
+
+  /* Small phones (e.g. iPhone SE, small Android) */
+  @media (max-width: 420px){
+    .panel{padding:16px 14px 20px;}
+    .brandmark span{font-size:10.5px;}
+    h1.title{font-size:17px;}
+    .theme-grid{grid-template-columns:repeat(2,1fr);gap:8px;}
+    .row2{grid-template-columns:1fr;}
+    .days-grid{grid-template-columns:repeat(4,1fr);}
+    .day-field:nth-child(n){min-width:0;}
+    .doctor-card{padding:10px;}
+    .section-head{padding:12px 13px;}
+    .section-head h2{font-size:12.5px;}
+    .mobile-nav .mn-title{font-size:12px;}
+    .mobile-nav button{padding:7px 10px;font-size:11px;}
+  }
+
+  /* Very narrow phones */
+  @media (max-width: 340px){
+    .days-grid{grid-template-columns:repeat(3,1fr);}
+    .theme-swatch .chip-name{font-size:9px;}
+  }
+
+  /* Landscape phones: reclaim vertical space in preview */
+  @media (max-width: 1050px) and (orientation: landscape) and (max-height: 500px){
+    .stage{padding:16px 16px calc(84px + env(safe-area-inset-bottom));}
+    .mobile-nav{padding:6px 14px;padding-top:calc(6px + env(safe-area-inset-top));}
+  }
+
+  /* High-density displays: keep hairline borders crisp */
+  @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi){
+    table.schedule th, table.schedule td{border-width:1px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- Mobile-only quick nav -->
+  <div class="mobile-nav" id="mobileNav">
+    <span class="mn-title">Lịch Làm Việc Phòng Khám</span>
+    <button id="navEditBtn" class="active" onclick="scrollToPanel()">✎ Chỉnh sửa</button>
+    <button id="navPreviewBtn" onclick="scrollToPreview()">🖼 Xem trước</button>
+  </div>
+
+  <!-- ================= LEFT CONTROL PANEL ================= -->
+  <div class="panel" id="panelSection">
+    <div class="brandmark"><div class="dot"></div><span>Trình tạo lịch làm việc</span></div>
+    <h1 class="title">Lịch Làm Việc Phòng Khám</h1>
+    <p class="sub">Nhập thông tin, chọn giao diện màu sắc và lịch làm việc từng bác sĩ — bản xem trước bên phải cập nhật ngay lập tức. Khi hoàn tất, bấm nút tải ảnh ở cuối trang.</p>
+
+    <!-- SECTION 0: THEME -->
+    <div class="section" id="sec-theme">
+      <div class="section-head" onclick="toggleSection('sec-theme')">
+        <h2><span class="num">✦</span>Giao diện màu sắc</h2>
+        <span class="chev">▾</span>
+      </div>
+      <div class="section-body">
+        <p class="hint">Chọn bảng màu phù hợp với thương hiệu phòng khám của bạn.</p>
+        <div class="theme-grid" id="themeGrid"></div>
+      </div>
+    </div>
+
+    <!-- SECTION 1: CLINIC INFO -->
+    <div class="section" id="sec-clinic">
+      <div class="section-head" onclick="toggleSection('sec-clinic')">
+        <h2><span class="num">1</span>Thông tin phòng khám</h2>
+        <span class="chev">▾</span>
+      </div>
+      <div class="section-body">
+        <div class="field">
+          <label>Logo phòng khám</label>
+          <div class="logo-upload">
+            <img id="logoPreview" class="logo-preview" src="" style="display:none;">
+            <div id="logoPlaceholder" class="logo-preview" style="display:flex;align-items:center;justify-content:center;font-size:10px;color:#a99b78;text-align:center;">Chưa có<br>logo</div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <input type="file" id="logoInput" accept="image/*" style="display:none;" onchange="handleLogoUpload(event)">
+              <button class="btn btn-outline" onclick="document.getElementById('logoInput').click()">Tải logo lên</button>
+              <button class="btn btn-ghost" onclick="clearLogo()">Xoá logo</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="field"><label>Dòng nhỏ trên cùng (loại hình)</label>
+          <input type="text" id="clinicLine1" value="PHÒNG KHÁM SẢN PHỤ KHOA" oninput="render()"></div>
+        <div class="field"><label>Tên nổi bật (in đậm, màu nhấn)</label>
+          <input type="text" id="clinicAccent" value="THIÊN PHƯỚC" oninput="render()"></div>
+        <div class="field"><label>Tên bác sĩ / chủ phòng khám</label>
+          <input type="text" id="clinicDoctor" value="BS. CKII. LƯƠNG PHONG NHÃ" oninput="render()"></div>
+        <div class="field"><label>Đơn vị trực thuộc (bệnh viện)</label>
+          <input type="text" id="clinicHospital" value="(BỆNH VIỆN ĐA KHOA TÂM TRÍ ĐỒNG THÁP)" oninput="render()"></div>
+        <div class="field"><label>Khẩu hiệu / tagline <span class="opt">(không bắt buộc)</span></label>
+          <input type="text" id="clinicTagline" value="Tận tâm chăm sóc sức khoẻ mẹ và bé" oninput="render()"></div>
+        <div class="field"><label>Địa chỉ</label>
+          <input type="text" id="clinicAddress" value="Đường Hùng Vương, Khóm 2, TT. Mỹ An, Tháp Mười, Đồng Tháp" oninput="render()"></div>
+
+        <div class="field">
+          <label>Số điện thoại</label>
+          <div id="phoneList" style="display:flex;flex-direction:column;gap:8px;"></div>
+          <button class="add-link" onclick="addPhone()">+ Thêm số điện thoại</button>
+        </div>
+
+        <div class="field"><label>Tiêu đề bảng lịch</label>
+          <input type="text" id="scheduleTitle" value="LỊCH LÀM VIỆC" oninput="render()"></div>
+        <div class="field"><label>Dòng thời gian khám (cuối trang)</label>
+          <input type="text" id="workingHours" value="THỜI GIAN KHÁM VÀ TƯ VẤN: TỪ 17H00 ĐẾN 20H" oninput="render()"></div>
+      </div>
+    </div>
+
+    <!-- SECTION 2: DOCTORS -->
+    <div class="section" id="sec-doctors">
+      <div class="section-head" onclick="toggleSection('sec-doctors')">
+        <h2><span class="num">2</span>Danh sách bác sĩ &amp; lịch làm việc</h2>
+        <span class="chev">▾</span>
+      </div>
+      <div class="section-body">
+        <p class="hint">Mỗi bác sĩ có 7 ô tương ứng Thứ 2 → Chủ nhật. Gõ nội dung ca làm hoặc bấm chip để đánh dấu nhanh ngày nghỉ. Ô ghi đúng chữ "NGHỈ" sẽ tự động hiển thị dạng nhãn đỏ nổi bật.</p>
+        <div id="doctorList"></div>
+        <button class="btn btn-outline" onclick="addDoctor()" style="align-self:flex-start;">+ Thêm bác sĩ</button>
+      </div>
+    </div>
+
+    <!-- SECTION 3: HIGHLIGHT DAYS -->
+    <div class="section collapsed" id="sec-highlight">
+      <div class="section-head" onclick="toggleSection('sec-highlight')">
+        <h2><span class="num">3</span>Tô màu cột ngày</h2>
+        <span class="chev">▾</span>
+      </div>
+      <div class="section-body">
+        <p class="hint">Chọn các cột ngày muốn tô nền nổi bật (thường dùng cho ngày nghỉ chung), giống mẫu Thứ 4 và Chủ nhật.</p>
+        <div class="quick-off" id="highlightDayChips"></div>
+      </div>
+    </div>
+
+    <!-- SECTION 4: EXPORT QUALITY -->
+    <div class="section collapsed" id="sec-export">
+      <div class="section-head" onclick="toggleSection('sec-export')">
+        <h2><span class="num">4</span>Chất lượng ảnh xuất</h2>
+        <span class="chev">▾</span>
+      </div>
+      <div class="section-body">
+        <div class="field">
+          <label>Độ phân giải</label>
+          <select id="exportScale">
+            <option value="2">Tiêu chuẩn — đăng mạng xã hội (x2)</option>
+            <option value="3" selected>Cao — sắc nét, khuyến nghị (x3)</option>
+            <option value="4">Rất cao — dùng để in ấn (x4)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="export-zone">
+      <button class="btn btn-gold" onclick="exportImage()">⬇ Tải ảnh lịch làm việc (PNG)</button>
+      <p class="status-msg" id="statusMsg"></p>
+    </div>
+  </div>
+
+  <!-- ================= RIGHT PREVIEW STAGE ================= -->
+  <div class="stage" id="stageSection">
+    <div class="stage-inner">
+      <span class="stage-label">Xem trước</span>
+      <div class="poster-scale-wrapper" id="posterScaleWrapper">
+      <div id="poster-outer">
+        <div id="poster">
+          <div class="corner tl"><span class="corner-dot"></span></div>
+          <div class="corner tr"><span class="corner-dot"></span></div>
+          <div class="corner bl"><span class="corner-dot"></span></div>
+          <div class="corner br"><span class="corner-dot"></span></div>
+
+          <div class="poster-header">
+            <div class="logo-ring">
+              <div class="logo-ring-inner">
+                <img id="posterLogoImg" class="poster-logo" src="" style="display:none;">
+                <span id="posterLogoPlaceholder" class="poster-logo placeholder-text">LOGO</span>
+              </div>
+            </div>
+            <div class="poster-headtext">
+              <p class="clinic-line1"><span id="pClinicLine1Text"></span><span class="accent" id="pClinicAccent"></span></p>
+              <p class="clinic-doctor" id="pClinicDoctor"></p>
+              <p class="clinic-hospital" id="pClinicHospital"></p>
+              <p class="clinic-tagline" id="pClinicTagline"></p>
+              <div class="clinic-meta">
+                <div class="meta-row">
+                  <svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z"/></svg>
+                  <span id="pClinicAddress"></span>
+                </div>
+                <div class="clinic-phones" id="pClinicPhones"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="divider"><span class="divider-line"></span><span class="divider-diamond"></span><span class="divider-line"></span></div>
+
+          <h2 class="poster-schedule-title" id="pScheduleTitle"></h2>
+
+          <div class="table-wrap">
+            <table class="schedule" id="pTable">
+              <thead><tr id="pTableHeadRow"></tr></thead>
+              <tbody id="pTableBody"></tbody>
+            </table>
+          </div>
+
+          <div class="poster-footer-wrap">
+            <div class="poster-footer">
+              <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 10.41V6a1 1 0 0 0-2 0v7a1 1 0 0 0 .29.71l4 4a1 1 0 0 0 1.42-1.42L13 12.41z"/></svg>
+              <span id="pWorkingHours"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+  <button class="fab-export" id="fabExport" onclick="exportImage()" title="Tải ảnh lịch làm việc" aria-label="Tải ảnh lịch làm việc">⬇</button>
+</div>
+
+<script>
+const DAYS = ["Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7","Chủ nhật"];
+
+const THEMES = [
+  {name:"Vàng Hoàng Gia", p1:"#8a6318", p2:"#b8892f", p3:"#e8c979", ink:"#4a3115", bg:"#fbf5e8", bg2:"#fffdf8", hi:"#e3ecda", hiLine:"#b9cfa4"},
+  {name:"Hồng Thanh Lịch", p1:"#8f2f47", p2:"#c05e79", p3:"#eeb8c6", ink:"#5c1f2e", bg:"#fdf3f5", bg2:"#fffbfc", hi:"#f3e1e6", hiLine:"#e0aebb"},
+  {name:"Ngọc Lam Y Tế", p1:"#0e6b64", p2:"#1a9a8c", p3:"#8fd9c9", ink:"#0a3d38", bg:"#f2f9f7", bg2:"#fbfffd", hi:"#dcefe9", hiLine:"#a9d6c9"},
+  {name:"Xanh Navy", p1:"#1c3a5e", p2:"#2f5f8f", p3:"#9dc0e0", ink:"#16283f", bg:"#f4f7fb", bg2:"#fbfdff", hi:"#dde7f2", hiLine:"#aac4dd"}
+];
+let currentThemeIndex = 0;
+
+let state = {
+  logo: null,
+  phones: [
+    {label:"Bs Nhã", number:"0906.991.985"},
+    {label:"Bs. Hậu", number:"0977.221.472"}
+  ],
+  highlightDays: [2, 6],
+  doctors: [
+    {title:"THS.BS\nHẬU", schedule:["Khám Nhi","Khám Nhi","NGHỈ","Khám Nhi","Khám Nhi","Khám Nhi","NGHỈ"]},
+    {title:"BS.CK2\nNHÃ", schedule:["Khám Sản","Khám Sản","NGHỈ","Khám Sản","Khám Sản","Khám Sản","NGHỈ"]}
+  ]
+};
+
+function hexToRgb(hex){
+  const m = hex.replace('#','').match(/.{1,2}/g);
+  return m.map(h => parseInt(h,16)).join(',');
+}
+
+function applyTheme(idx){
+  currentThemeIndex = idx;
+  const t = THEMES[idx];
+  const root = document.documentElement.style;
+  root.setProperty('--p1', t.p1);
+  root.setProperty('--p2', t.p2);
+  root.setProperty('--p3', t.p3);
+  root.setProperty('--p2-rgb', hexToRgb(t.p2));
+  root.setProperty('--ink', t.ink);
+  root.setProperty('--bg', t.bg);
+  root.setProperty('--bg2', t.bg2);
+  root.setProperty('--hi', t.hi);
+  root.setProperty('--hi-line', t.hiLine);
+  renderThemeGrid();
+}
+
+function renderThemeGrid(){
+  const wrap = document.getElementById('themeGrid');
+  wrap.innerHTML = '';
+  THEMES.forEach((t,i)=>{
+    const el = document.createElement('div');
+    el.className = 'theme-swatch' + (i===currentThemeIndex ? ' active':'');
+    el.innerHTML = `<div class="chip-preview" style="background:linear-gradient(135deg,${t.p3},${t.p2},${t.p1});"></div><div class="chip-name">${t.name}</div>`;
+    el.onclick = ()=>{ applyTheme(i); render(); };
+    wrap.appendChild(el);
+  });
+}
+
+function toggleSection(id){ document.getElementById(id).classList.toggle('collapsed'); }
+
+function handleLogoUpload(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev){ state.logo = ev.target.result; render(); };
+  reader.readAsDataURL(file);
+}
+function clearLogo(){ state.logo = null; document.getElementById('logoInput').value=''; render(); }
+
+function addPhone(){ state.phones.push({label:"", number:""}); renderPhoneInputs(); render(); }
+function removePhone(i){ state.phones.splice(i,1); renderPhoneInputs(); render(); }
+function updatePhone(i, field, val){ state.phones[i][field] = val; render(); }
+function renderPhoneInputs(){
+  const wrap = document.getElementById('phoneList');
+  wrap.innerHTML = '';
+  state.phones.forEach((p, i)=>{
+    const row = document.createElement('div');
+    row.className = 'phone-row';
+    row.innerHTML = `
+      <input type="text" placeholder="Nhãn (VD: Bs Nhã)" value="${escapeAttr(p.label)}" oninput="updatePhone(${i},'label',this.value)" style="flex:0.9;">
+      <input type="tel" placeholder="Số điện thoại" value="${escapeAttr(p.number)}" oninput="updatePhone(${i},'number',this.value)" style="flex:1.1;">
+      <button class="icon-btn" onclick="removePhone(${i})" title="Xoá">✕</button>`;
+    wrap.appendChild(row);
+  });
+}
+
+function addDoctor(){ state.doctors.push({title:"BS.\nMỚI", schedule:["","","","","","",""]}); renderDoctorInputs(); render(); }
+function removeDoctor(i){ state.doctors.splice(i,1); renderDoctorInputs(); render(); }
+function updateDoctorTitle(i, val){ state.doctors[i].title = val; render(); }
+function updateDoctorDay(i, dayIdx, val){ state.doctors[i].schedule[dayIdx] = val; render(); }
+function markOff(i, dayIdx){ state.doctors[i].schedule[dayIdx] = "NGHỈ"; renderDoctorInputs(); render(); }
+function markAllWork(i, text){
+  state.doctors[i].schedule = state.doctors[i].schedule.map(v => v === "NGHỈ" || v === "" ? text : v);
+  renderDoctorInputs(); render();
+}
+
+function renderDoctorInputs(){
+  const wrap = document.getElementById('doctorList');
+  wrap.innerHTML = '';
+  state.doctors.forEach((doc, i)=>{
+    const card = document.createElement('div');
+    card.className = 'doctor-card';
+    const daysHtml = DAYS.map((d, di)=>{
+      const val = doc.schedule[di] || "";
+      const isOff = val.trim().toUpperCase() === "NGHỈ";
+      return `<div class="day-field ${isOff?'off':''}"><span>${d}</span><input type="text" value="${escapeAttr(val)}" oninput="updateDoctorDay(${i},${di},this.value)"></div>`;
+    }).join('');
+    card.innerHTML = `
+      <div class="doctor-card-head">
+        <span class="tag">Bác sĩ ${i+1}</span>
+        <button class="icon-btn" onclick="removeDoctor(${i})" title="Xoá bác sĩ">✕</button>
+      </div>
+      <div class="field"><label>Chức danh / Tên</label>
+        <textarea rows="2" oninput="updateDoctorTitle(${i},this.value)">${escapeHtml(doc.title)}</textarea></div>
+      <div class="field"><label>Lịch làm việc theo ngày</label>
+        <div class="days-grid">${daysHtml}</div></div>
+      <div class="quick-off">
+        <button class="chip" onclick="markOff(${i}, 2)">Thứ 4 nghỉ</button>
+        <button class="chip" onclick="markOff(${i}, 6)">CN nghỉ</button>
+        <button class="chip" onclick="markAllWork(${i}, 'Khám')">Điền "Khám" ô trống</button>
+      </div>`;
+    wrap.appendChild(card);
+  });
+}
+
+function renderHighlightChips(){
+  const wrap = document.getElementById('highlightDayChips');
+  wrap.innerHTML = '';
+  DAYS.forEach((d, i)=>{
+    const active = state.highlightDays.includes(i);
+    const chip = document.createElement('button');
+    chip.className = 'chip';
+    chip.textContent = d;
+    chip.style.background = active ? '#e3ecda' : '#fff';
+    chip.style.borderColor = active ? '#b9cfa4' : '#ddd2b3';
+    chip.style.color = active ? '#5a7a3f' : '#8a7f68';
+    chip.onclick = ()=>{
+      const idx = state.highlightDays.indexOf(i);
+      if(idx > -1) state.highlightDays.splice(idx,1); else state.highlightDays.push(i);
+      renderHighlightChips(); render();
+    };
+    wrap.appendChild(chip);
+  });
+}
+
+function escapeHtml(str){ return (str||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function escapeAttr(str){ return (str||"").replace(/&/g,"&amp;").replace(/"/g,"&quot;"); }
+function nl2br(str){ return escapeHtml(str).replace(/\n/g,"<br>"); }
+
+function render(){
+  const logoImg = document.getElementById('posterLogoImg');
+  const logoPh = document.getElementById('posterLogoPlaceholder');
+  const smallLogoPreview = document.getElementById('logoPreview');
+  const smallLogoPh = document.getElementById('logoPlaceholder');
+  if(state.logo){
+    logoImg.src = state.logo; logoImg.style.display = 'block'; logoPh.style.display = 'none';
+    smallLogoPreview.src = state.logo; smallLogoPreview.style.display = 'block'; smallLogoPh.style.display = 'none';
+  } else {
+    logoImg.style.display = 'none'; logoPh.style.display = 'flex';
+    smallLogoPreview.style.display = 'none'; smallLogoPh.style.display = 'flex';
+  }
+
+  document.getElementById('pClinicLine1Text').textContent = document.getElementById('clinicLine1').value + " ";
+  document.getElementById('pClinicAccent').textContent = document.getElementById('clinicAccent').value;
+  document.getElementById('pClinicDoctor').textContent = document.getElementById('clinicDoctor').value;
+  document.getElementById('pClinicHospital').textContent = document.getElementById('clinicHospital').value;
+  const tagline = document.getElementById('clinicTagline').value;
+  const taglineEl = document.getElementById('pClinicTagline');
+  taglineEl.textContent = tagline;
+  taglineEl.style.display = tagline ? 'block' : 'none';
+  document.getElementById('pClinicAddress').textContent = document.getElementById('clinicAddress').value;
+  document.getElementById('pScheduleTitle').textContent = document.getElementById('scheduleTitle').value;
+  document.getElementById('pWorkingHours').textContent = document.getElementById('workingHours').value;
+
+  const phonesWrap = document.getElementById('pClinicPhones');
+  phonesWrap.innerHTML = state.phones.filter(p=>p.number).map(p=>`
+    <span class="phone-item">
+      <svg viewBox="0 0 24 24"><path d="M6.6 10.8c1.4 2.8 3.7 5.1 6.5 6.5l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.5.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4.2c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.5.1.4 0 .8-.2 1.1L6.6 10.8z"/></svg>
+      ${p.label ? escapeHtml(p.label)+': ' : ''}<b>${escapeHtml(p.number)}</b>
+    </span>`).join('');
+
+  const headRow = document.getElementById('pTableHeadRow');
+  let headHtml = `<th class="first-col"></th>`;
+  DAYS.forEach((d,i)=>{
+    const off = state.highlightDays.includes(i);
+    headHtml += `<th class="${off?'off-col':''}">${d}</th>`;
+  });
+  headRow.innerHTML = headHtml;
+
+  const body = document.getElementById('pTableBody');
+  body.innerHTML = state.doctors.map(doc=>{
+    let cells = doc.schedule.map((val,i)=>{
+      const off = state.highlightDays.includes(i);
+      const isOffText = (val||"").trim().toUpperCase() === "NGHỈ";
+      const content = isOffText ? `<span class="pill-off">NGHỈ</span>` : nl2br(val);
+      return `<td class="${off?'off-col':''}">${content}</td>`;
+    }).join('');
+    return `<tr><th>${nl2br(doc.title)}</th>${cells}</tr>`;
+  }).join('');
+
+  if(typeof fitPosterToScreen === 'function') scheduleFit();
+}
+
+function exportImage(){
+  const status = document.getElementById('statusMsg');
+  status.textContent = "Đang tạo ảnh...";
+  const poster = document.getElementById('poster-outer');
+  const scale = parseInt(document.getElementById('exportScale').value, 10) || 3;
+
+  // Reset any mobile fit-to-screen scaling so the export is always full, undistorted resolution
+  const prevTransform = poster.style.transform;
+  poster.style.transform = 'none';
+
+  html2canvas(poster, { scale, backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || "#fbf5e8", useCORS:true }).then(canvas=>{
+    poster.style.transform = prevTransform;
+    fitPosterToScreen();
+    const link = document.createElement('a');
+    const nameRaw = (document.getElementById('clinicAccent').value || 'phong-kham').trim().toLowerCase();
+    const safeName = nameRaw.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'') || 'phong-kham';
+    link.download = `lich-lam-viec-${safeName}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    status.textContent = "✓ Đã tải ảnh thành công!";
+    setTimeout(()=>{ status.textContent = ""; }, 3500);
+  }).catch(err=>{
+    poster.style.transform = prevTransform;
+    fitPosterToScreen();
+    status.textContent = "Có lỗi khi tạo ảnh, vui lòng thử lại.";
+    console.error(err);
+  });
+}
+
+/* ---------- Mobile nav ---------- */
+function scrollToPanel(){
+  document.getElementById('panelSection').scrollIntoView({behavior:'smooth', block:'start'});
+  setActiveNav('navEditBtn');
+}
+function scrollToPreview(){
+  document.getElementById('stageSection').scrollIntoView({behavior:'smooth', block:'start'});
+  setActiveNav('navPreviewBtn');
+}
+function setActiveNav(id){
+  ['navEditBtn','navPreviewBtn'].forEach(btnId=>{
+    document.getElementById(btnId).classList.toggle('active', btnId === id);
+  });
+}
+
+/* ---------- Responsive poster scaling ---------- */
+let posterNaturalWidth = 0;
+let posterNaturalHeight = 0;
+
+function measurePosterNatural(){
+  const outer = document.getElementById('poster-outer');
+  outer.style.transform = 'none';
+  posterNaturalWidth = outer.offsetWidth;
+  posterNaturalHeight = outer.offsetHeight;
+}
+
+function fitPosterToScreen(){
+  const wrapper = document.getElementById('posterScaleWrapper');
+  const outer = document.getElementById('poster-outer');
+  if(!wrapper || !outer) return;
+  measurePosterNatural();
+  if(!posterNaturalWidth) return;
+  const available = wrapper.clientWidth;
+  let scale = available / posterNaturalWidth;
+  if(scale > 1) scale = 1; // never upscale beyond natural size
+  outer.style.transform = `scale(${scale})`;
+  wrapper.style.height = (posterNaturalHeight * scale) + 'px';
+}
+
+let fitResizeTimer = null;
+function scheduleFit(){
+  clearTimeout(fitResizeTimer);
+  fitResizeTimer = setTimeout(fitPosterToScreen, 60);
+}
+window.addEventListener('resize', scheduleFit);
+window.addEventListener('orientationchange', scheduleFit);
+
+/* ---------- Init ---------- */
+applyTheme(0);
+renderPhoneInputs();
+renderDoctorInputs();
+renderHighlightChips();
+render();
+scheduleFit();
+</script>
+
+</body>
+</html>
