@@ -127,6 +127,10 @@
   .theme-swatch .chip-name{font-size:10px;color:var(--text-mute);font-weight:700;}
 
   .logo-upload{display:flex;align-items:center;gap:14px;}
+  .toggle-row{display:flex;align-items:center;gap:9px;font-size:12.5px;font-weight:600;color:var(--ink);cursor:pointer;user-select:none;}
+  .toggle-row input[type=checkbox]{width:17px;height:17px;accent-color:var(--p2);cursor:pointer;flex-shrink:0;margin:0;}
+  .toggle-row input[type=checkbox]:disabled{cursor:not-allowed;opacity:.5;}
+  .toggle-row.is-disabled{color:var(--text-mute);}
   .logo-preview{width:64px;height:64px;border-radius:50%;border:2px solid var(--p3);object-fit:cover;background:#f6f0de;flex-shrink:0;}
   .btn{border:none;cursor:pointer;font-family:inherit;font-weight:600;border-radius:8px;padding:9px 14px;font-size:12.5px;transition:transform .1s ease, box-shadow .15s ease;}
   .btn:active{transform:scale(.97);}
@@ -164,14 +168,14 @@
   .status-msg{font-size:12px;text-align:center;color:var(--p1);margin-top:0;min-height:16px;font-weight:600;}
 
   /* ============ RIGHT: PREVIEW STAGE ============ */
-  .stage{background:radial-gradient(circle at 20% 15%, #efe6cf 0%, transparent 45%), #eee7d8;padding:48px;display:flex;align-items:flex-start;justify-content:center;overflow:auto;}
+  .stage{background:radial-gradient(circle at 20% 15%, #efe6cf 0%, transparent 45%), #eee7d8;padding:48px;display:flex;align-items:flex-start;justify-content:center;overflow-x:auto;overflow-y:visible;}
   .stage-inner{display:flex;flex-direction:column;align-items:center;gap:16px;width:100%;}
   .stage-label{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#a99b78;font-weight:700;}
   .poster-scale-wrapper{
     width:100%;
     display:flex;
     justify-content:center;
-    overflow:hidden;
+    overflow:visible; /* never clip the poster — a mis-measured height must never hide content */
   }
   .poster-scale-wrapper #poster-outer{
     transform-origin:top center;
@@ -212,6 +216,7 @@
 
   .poster-header{display:flex;align-items:flex-start;gap:24px;padding-bottom:18px;position:relative;z-index:1;}
   .logo-ring{width:104px;height:104px;border-radius:50%;flex-shrink:0;padding:4px;background:conic-gradient(from 180deg, var(--p3), var(--p2), var(--p3));display:flex;align-items:center;justify-content:center;}
+  .logo-ring.is-hidden{display:none;}
   .logo-ring-inner{width:100%;height:100%;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;border:2px solid #fff;}
   .poster-logo{width:100%;height:100%;object-fit:cover;}
   .poster-logo.placeholder-text{font-family:'Playfair Display',serif;font-weight:700;font-size:24px;color:var(--p2);}
@@ -375,6 +380,11 @@
               <button class="btn btn-ghost" onclick="clearLogo()">Xoá logo</button>
             </div>
           </div>
+          <label id="showLogoLabel" class="toggle-row" style="margin-top:10px;">
+            <input type="checkbox" id="showLogoToggle" onchange="toggleShowLogo()" disabled>
+            <span>Hiển thị logo trên thiết kế</span>
+          </label>
+          <p class="hint" id="showLogoHint">Tải logo lên trước, sau đó bật/tắt để hiện hoặc ẩn logo khỏi ảnh xuất ra. Nếu không tải logo hoặc tắt tuỳ chọn này, khu vực logo sẽ được ẩn hoàn toàn khỏi thiết kế.</p>
         </div>
 
         <div class="field"><label>Dòng nhỏ trên cùng (loại hình)</label>
@@ -465,7 +475,7 @@
           <div class="corner br"><span class="corner-dot"></span></div>
 
           <div class="poster-header">
-            <div class="logo-ring">
+            <div class="logo-ring" id="posterLogoRing">
               <div class="logo-ring-inner">
                 <img id="posterLogoImg" class="poster-logo" src="" style="display:none;">
                 <span id="posterLogoPlaceholder" class="poster-logo placeholder-text">LOGO</span>
@@ -525,6 +535,7 @@ let currentThemeIndex = 0;
 
 let state = {
   logo: null,
+  showLogo: false,
   phones: [
     {label:"Bs Nhã", number:"0906.991.985"},
     {label:"Bs. Hậu", number:"0977.221.472"}
@@ -575,10 +586,23 @@ function handleLogoUpload(e){
   const file = e.target.files[0];
   if(!file) return;
   const reader = new FileReader();
-  reader.onload = function(ev){ state.logo = ev.target.result; render(); };
+  reader.onload = function(ev){
+    state.logo = ev.target.result;
+    state.showLogo = true; // uploading a logo shows it by default; user can still turn it off
+    render();
+  };
   reader.readAsDataURL(file);
 }
-function clearLogo(){ state.logo = null; document.getElementById('logoInput').value=''; render(); }
+function clearLogo(){
+  state.logo = null;
+  state.showLogo = false;
+  document.getElementById('logoInput').value='';
+  render();
+}
+function toggleShowLogo(){
+  state.showLogo = document.getElementById('showLogoToggle').checked;
+  render();
+}
 
 function addPhone(){ state.phones.push({label:"", number:""}); renderPhoneInputs(); render(); }
 function removePhone(i){ state.phones.splice(i,1); renderPhoneInputs(); render(); }
@@ -663,14 +687,36 @@ function nl2br(str){ return escapeHtml(str).replace(/\n/g,"<br>"); }
 function render(){
   const logoImg = document.getElementById('posterLogoImg');
   const logoPh = document.getElementById('posterLogoPlaceholder');
+  const posterLogoRing = document.getElementById('posterLogoRing');
   const smallLogoPreview = document.getElementById('logoPreview');
   const smallLogoPh = document.getElementById('logoPlaceholder');
+  const showLogoToggle = document.getElementById('showLogoToggle');
+  const showLogoLabel = document.getElementById('showLogoLabel');
+
   if(state.logo){
-    logoImg.src = state.logo; logoImg.style.display = 'block'; logoPh.style.display = 'none';
+    // small preview in the control panel always shows the uploaded file (so the user
+    // can still see/manage it even while it's toggled off in the actual design)
     smallLogoPreview.src = state.logo; smallLogoPreview.style.display = 'block'; smallLogoPh.style.display = 'none';
+    showLogoToggle.disabled = false;
+    showLogoLabel.classList.remove('is-disabled');
   } else {
-    logoImg.style.display = 'none'; logoPh.style.display = 'flex';
     smallLogoPreview.style.display = 'none'; smallLogoPh.style.display = 'flex';
+    showLogoToggle.disabled = true;
+    showLogoToggle.checked = false;
+    showLogoLabel.classList.add('is-disabled');
+    state.showLogo = false;
+  }
+  showLogoToggle.checked = !!(state.logo && state.showLogo);
+
+  // Logo only ever appears in the exported design when BOTH a logo was uploaded
+  // AND the "Hiển thị logo" toggle is on — otherwise the whole logo ring is removed.
+  const shouldShowLogo = !!(state.logo && state.showLogo);
+  if(shouldShowLogo){
+    posterLogoRing.classList.remove('is-hidden');
+    logoImg.src = state.logo; logoImg.style.display = 'block'; logoPh.style.display = 'none';
+  } else {
+    posterLogoRing.classList.add('is-hidden');
+    logoImg.style.display = 'none'; logoPh.style.display = 'none';
   }
 
   document.getElementById('pClinicLine1Text').textContent = document.getElementById('clinicLine1').value + " ";
@@ -714,33 +760,96 @@ function render(){
   if(typeof fitPosterToScreen === 'function') scheduleFit();
 }
 
-function exportImage(){
+/* ---------- Export: always capture the FULL poster, never a clipped portion ----------
+   Any ancestor with overflow other than 'visible' (or a constrained max-height) can
+   silently clip html2canvas's render even if the target element itself is full-size.
+   We temporarily neutralise every such ancestor, wait two animation frames for the
+   browser to finish reflow, capture, then restore everything exactly as it was. */
+function neutraliseClipping(el){
+  const restore = [];
+  let node = el.parentElement;
+  while(node && node !== document.documentElement){
+    const cs = getComputedStyle(node);
+    const needsFix = cs.overflow !== 'visible' || cs.overflowX !== 'visible' || cs.overflowY !== 'visible'
+      || (cs.maxHeight !== 'none' && cs.maxHeight !== '') || (cs.height !== 'auto' && node.id === 'posterScaleWrapper');
+    if(needsFix){
+      restore.push({
+        node,
+        overflow: node.style.overflow,
+        overflowX: node.style.overflowX,
+        overflowY: node.style.overflowY,
+        maxHeight: node.style.maxHeight,
+        height: node.style.height,
+        transform: node.style.transform
+      });
+      node.style.overflow = 'visible';
+      node.style.overflowX = 'visible';
+      node.style.overflowY = 'visible';
+      node.style.maxHeight = 'none';
+      if(node.id === 'posterScaleWrapper'){ node.style.height = 'auto'; }
+    }
+    node = node.parentElement;
+  }
+  return () => restore.forEach(r=>{
+    r.node.style.overflow = r.overflow;
+    r.node.style.overflowX = r.overflowX;
+    r.node.style.overflowY = r.overflowY;
+    r.node.style.maxHeight = r.maxHeight;
+    r.node.style.height = r.height;
+  });
+}
+
+function waitTwoFrames(){
+  return new Promise(resolve=>{
+    requestAnimationFrame(()=>requestAnimationFrame(resolve));
+  });
+}
+
+async function exportImage(){
   const status = document.getElementById('statusMsg');
-  status.textContent = "Đang tạo ảnh...";
+  const btnLabel = "⬇ Tải ảnh lịch làm việc (PNG)";
+  status.textContent = "Đang tạo ảnh, vui lòng chờ...";
   const poster = document.getElementById('poster-outer');
   const scale = parseInt(document.getElementById('exportScale').value, 10) || 3;
 
-  // Reset any mobile fit-to-screen scaling so the export is always full, undistorted resolution
+  // 1) Reset any mobile fit-to-screen scaling so export is always full, undistorted resolution
   const prevTransform = poster.style.transform;
   poster.style.transform = 'none';
 
-  html2canvas(poster, { scale, backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || "#fbf5e8", useCORS:true }).then(canvas=>{
-    poster.style.transform = prevTransform;
-    fitPosterToScreen();
+  // 2) Neutralise every ancestor that could clip the render (the root cause of partial downloads)
+  const restoreClipping = neutraliseClipping(poster);
+
+  // 3) Let the browser finish layout before html2canvas measures/paints
+  await waitTwoFrames();
+
+  try{
+    const canvas = await html2canvas(poster, {
+      scale,
+      backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || "#fbf5e8",
+      useCORS: true,
+      width: poster.scrollWidth,
+      height: poster.scrollHeight,
+      windowWidth: poster.scrollWidth,
+      windowHeight: poster.scrollHeight
+    });
+
     const link = document.createElement('a');
     const nameRaw = (document.getElementById('clinicAccent').value || 'phong-kham').trim().toLowerCase();
     const safeName = nameRaw.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'') || 'phong-kham';
     link.download = `lich-lam-viec-${safeName}.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();
-    status.textContent = "✓ Đã tải ảnh thành công!";
-    setTimeout(()=>{ status.textContent = ""; }, 3500);
-  }).catch(err=>{
-    poster.style.transform = prevTransform;
-    fitPosterToScreen();
+    status.textContent = "✓ Đã tải ảnh đầy đủ thành công!";
+  }catch(err){
     status.textContent = "Có lỗi khi tạo ảnh, vui lòng thử lại.";
     console.error(err);
-  });
+  }finally{
+    // 4) Always restore the page exactly as the user had it
+    poster.style.transform = prevTransform;
+    restoreClipping();
+    fitPosterToScreen();
+    setTimeout(()=>{ status.textContent = ""; }, 3500);
+  }
 }
 
 /* ---------- Mobile nav ---------- */
@@ -758,15 +867,20 @@ function setActiveNav(id){
   });
 }
 
-/* ---------- Responsive poster scaling ---------- */
+/* ---------- Responsive poster scaling ----------
+   The preview never gets clipped now (overflow:visible everywhere), so even if this
+   measurement is briefly stale (e.g. web font still loading) the worst case is a small
+   layout gap — never lost/cropped content. We still re-fit aggressively to keep it tight. */
 let posterNaturalWidth = 0;
 let posterNaturalHeight = 0;
 
 function measurePosterNatural(){
   const outer = document.getElementById('poster-outer');
+  const prevTransform = outer.style.transform;
   outer.style.transform = 'none';
   posterNaturalWidth = outer.offsetWidth;
   posterNaturalHeight = outer.offsetHeight;
+  outer.style.transform = prevTransform;
 }
 
 function fitPosterToScreen(){
@@ -778,8 +892,9 @@ function fitPosterToScreen(){
   const available = wrapper.clientWidth;
   let scale = available / posterNaturalWidth;
   if(scale > 1) scale = 1; // never upscale beyond natural size
+  if(!isFinite(scale) || scale <= 0) scale = 1;
   outer.style.transform = `scale(${scale})`;
-  wrapper.style.height = (posterNaturalHeight * scale) + 'px';
+  wrapper.style.height = Math.ceil(posterNaturalHeight * scale) + 'px';
 }
 
 let fitResizeTimer = null;
@@ -797,6 +912,16 @@ renderDoctorInputs();
 renderHighlightChips();
 render();
 scheduleFit();
+
+// Re-fit once web fonts finish loading (font swap can change text height/width
+// after the first measurement — this used to be the cause of a mis-sized preview)
+if(document.fonts && document.fonts.ready){
+  document.fonts.ready.then(()=>{ fitPosterToScreen(); });
+}
+window.addEventListener('load', ()=>{ fitPosterToScreen(); });
+// One more delayed pass covers slow devices / late web-font swap
+setTimeout(fitPosterToScreen, 400);
+setTimeout(fitPosterToScreen, 1200);
 </script>
 
 </body>
