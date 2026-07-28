@@ -152,11 +152,23 @@
   .doctor-card + .doctor-card{margin-top:10px;}
   .doctor-card-head{display:flex;justify-content:space-between;align-items:center;}
   .doctor-card-head .tag{font-size:11px;font-weight:700;color:var(--p1);background:#fbf1da;padding:3px 9px;border-radius:20px;}
-  .days-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
-  .day-field{display:flex;flex-direction:column;gap:3px;}
-  .day-field span{font-size:9.5px;text-align:center;color:var(--text-mute);font-weight:700;text-transform:uppercase;}
-  .day-field input{padding:6px 4px;text-align:center;font-size:11px;border-radius:6px;}
-  .day-field.off input{background:#f3ede0;color:var(--text-mute);}
+  .days-list{display:flex;flex-direction:column;gap:9px;}
+  .day-row{border:1px solid var(--panel-line);border-radius:9px;background:#fffdf9;padding:9px 10px 10px;}
+  .day-row.off{background:#f3ede0;}
+  .day-row-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px;flex-wrap:wrap;}
+  .day-name{font-size:11.5px;font-weight:800;color:var(--ink);text-transform:uppercase;letter-spacing:.03em;flex-shrink:0;}
+  .day-quick-chips{display:flex;gap:5px;flex-wrap:wrap;flex:1;justify-content:flex-end;}
+  .mini-chip{font-size:10px;padding:4px 9px;border-radius:20px;border:1px solid #ddd2b3;background:#fff;cursor:pointer;color:var(--text-mute);font-weight:700;white-space:nowrap;}
+  .mini-chip:hover{border-color:var(--p2);color:var(--p1);}
+  .mini-chip.clock{color:var(--p1);border-color:var(--p3);background:#fbf3df;}
+  .day-input{width:100%;min-height:46px;padding:8px 9px;border:1px solid #ddd2b3;border-radius:7px;font-family:inherit;font-size:13px;background:#fff;color:var(--text-dark);resize:vertical;line-height:1.45;}
+  .day-input:focus{outline:none;border-color:var(--p2);box-shadow:0 0 0 3px rgba(var(--p2-rgb),.15);}
+  .day-row.off .day-input{background:#f3ede0;color:var(--text-mute);}
+  .day-time-picker{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin-top:8px;padding:9px;border-radius:7px;background:#fbf7ea;border:1px dashed var(--p3);}
+  .day-time-picker input[type=time]{width:auto;padding:6px 7px;font-size:12.5px;flex:0 0 auto;}
+  .day-time-picker input[type=text]{flex:1 1 130px;padding:6px 8px;font-size:12.5px;}
+  .time-sep{font-size:12px;color:var(--text-mute);font-weight:700;}
+  .day-time-picker .btn{padding:6px 11px;font-size:11.5px;flex-shrink:0;}
   .quick-off{display:flex;gap:6px;flex-wrap:wrap;}
   .chip{font-size:10.5px;padding:4px 9px;border-radius:20px;border:1px solid #ddd2b3;background:#fff;cursor:pointer;color:var(--text-mute);font-weight:600;}
   .chip:hover{border-color:var(--p2);color:var(--p1);}
@@ -293,7 +305,9 @@
     .stage{padding:20px 10px calc(96px + env(safe-area-inset-bottom));}
     /* Prevent iOS auto-zoom on focus: inputs need >=16px font */
     input[type=text], input[type=tel], textarea, select{font-size:16px;padding:10px 11px;}
-    .day-field input{font-size:13px;padding:8px 4px;}
+    .day-input{font-size:16px;padding:9px 10px;}
+    .day-time-picker input[type=time]{font-size:16px;}
+    .day-time-picker input[type=text]{font-size:16px;}
     .icon-btn{width:38px;height:38px;font-size:16px;}
     .btn{padding:11px 14px;font-size:13px;}
     .chip{padding:6px 11px;font-size:11px;}
@@ -306,8 +320,7 @@
     h1.title{font-size:17px;}
     .theme-grid{grid-template-columns:repeat(2,1fr);gap:8px;}
     .row2{grid-template-columns:1fr;}
-    .days-grid{grid-template-columns:repeat(4,1fr);}
-    .day-field:nth-child(n){min-width:0;}
+    .day-quick-chips{justify-content:flex-start;}
     .doctor-card{padding:10px;}
     .section-head{padding:12px 13px;}
     .section-head h2{font-size:12.5px;}
@@ -317,8 +330,8 @@
 
   /* Very narrow phones */
   @media (max-width: 340px){
-    .days-grid{grid-template-columns:repeat(3,1fr);}
     .theme-swatch .chip-name{font-size:9px;}
+    .mini-chip{font-size:9.5px;padding:3px 7px;}
   }
 
   /* Landscape phones: reclaim vertical space in preview */
@@ -420,7 +433,7 @@
         <span class="chev">▾</span>
       </div>
       <div class="section-body">
-        <p class="hint">Mỗi bác sĩ có 7 ô tương ứng Thứ 2 → Chủ nhật. Gõ nội dung ca làm hoặc bấm chip để đánh dấu nhanh ngày nghỉ. Ô ghi đúng chữ "NGHỈ" sẽ tự động hiển thị dạng nhãn đỏ nổi bật.</p>
+        <p class="hint">Mỗi bác sĩ có 7 dòng tương ứng Thứ 2 → Chủ nhật, ô nhập đã mở rộng và cho xuống dòng để ghi chi tiết hơn (VD: loại khám + khung giờ). Bấm chip "Sáng / Chiều / Tối / Cả ngày / Nghỉ" để điền nhanh khung giờ mẫu, hoặc bấm "🕒 Giờ tuỳ chỉnh" để tự chọn giờ bắt đầu — kết thúc theo ý muốn. Ô ghi đúng chữ "NGHỈ" sẽ tự động hiển thị dạng nhãn đỏ nổi bật.</p>
         <div id="doctorList"></div>
         <button class="btn btn-outline" onclick="addDoctor()" style="align-self:flex-start;">+ Thêm bác sĩ</button>
       </div>
@@ -533,6 +546,19 @@ const THEMES = [
 ];
 let currentThemeIndex = 0;
 
+/* Which doctor+day time-picker is currently expanded, e.g. "1_2" = doctor index 1, day index 2 */
+let dayPickerOpen = {};
+
+/* Quick-select shift presets — inserted instantly when a chip is clicked.
+   Times reflect common clinic shift patterns and can always be overridden manually. */
+const DAY_PRESETS = {
+  morning:  {text:"07:00 - 11:00"},
+  afternoon:{text:"13:00 - 17:00"},
+  evening:  {text:"17:00 - 20:00"},
+  full:     {text:"07:00 - 17:00"},
+  off:      {text:"NGHỈ"}
+};
+
 let state = {
   logo: null,
   showLogo: false,
@@ -631,6 +657,48 @@ function markAllWork(i, text){
   renderDoctorInputs(); render();
 }
 
+/* ---- Quick-select / manual time range for a single day of a single doctor ---- */
+function setDayPreset(docIdx, dayIdx, presetKey){
+  const preset = DAY_PRESETS[presetKey];
+  if(!preset) return;
+  state.doctors[docIdx].schedule[dayIdx] = preset.text;
+  const key = `${docIdx}_${dayIdx}`;
+  dayPickerOpen[key] = false;
+  renderDoctorInputs(); render();
+}
+
+function clearDayValue(docIdx, dayIdx){
+  state.doctors[docIdx].schedule[dayIdx] = "";
+  renderDoctorInputs(); render();
+}
+
+function toggleDayPicker(key){
+  dayPickerOpen[key] = !dayPickerOpen[key];
+  renderDoctorInputs();
+}
+
+function applyTimeRange(docIdx, dayIdx, key){
+  const startEl = document.getElementById('start_'+key);
+  const endEl = document.getElementById('end_'+key);
+  const noteEl = document.getElementById('note_'+key);
+  const start = startEl ? startEl.value : "";
+  const end = endEl ? endEl.value : "";
+  const note = noteEl ? noteEl.value.trim() : "";
+
+  let text = "";
+  if(start && end) text = `${start} - ${end}`;
+  else if(start) text = start;
+  else if(end) text = end;
+
+  if(note) text = text ? `${text}\n${note}` : note;
+
+  if(!text){ return; } // nothing entered — leave the cell untouched
+
+  state.doctors[docIdx].schedule[dayIdx] = text;
+  dayPickerOpen[key] = false;
+  renderDoctorInputs(); render();
+}
+
 function renderDoctorInputs(){
   const wrap = document.getElementById('doctorList');
   wrap.innerHTML = '';
@@ -640,7 +708,32 @@ function renderDoctorInputs(){
     const daysHtml = DAYS.map((d, di)=>{
       const val = doc.schedule[di] || "";
       const isOff = val.trim().toUpperCase() === "NGHỈ";
-      return `<div class="day-field ${isOff?'off':''}"><span>${d}</span><input type="text" value="${escapeAttr(val)}" oninput="updateDoctorDay(${i},${di},this.value)"></div>`;
+      const key = `${i}_${di}`;
+      const pickerOpen = !!dayPickerOpen[key];
+      return `
+        <div class="day-row ${isOff?'off':''}">
+          <div class="day-row-head">
+            <span class="day-name">${d}</span>
+            <div class="day-quick-chips">
+              <button type="button" class="mini-chip" onclick="setDayPreset(${i},${di},'morning')" title="07:00 - 11:00">Sáng</button>
+              <button type="button" class="mini-chip" onclick="setDayPreset(${i},${di},'afternoon')" title="13:00 - 17:00">Chiều</button>
+              <button type="button" class="mini-chip" onclick="setDayPreset(${i},${di},'evening')" title="17:00 - 20:00">Tối</button>
+              <button type="button" class="mini-chip" onclick="setDayPreset(${i},${di},'full')" title="07:00 - 17:00">Cả ngày</button>
+              <button type="button" class="mini-chip" onclick="setDayPreset(${i},${di},'off')">Nghỉ</button>
+              <button type="button" class="mini-chip clock" onclick="toggleDayPicker('${key}')">${pickerOpen ? '✕ Đóng' : '🕒 Giờ tuỳ chỉnh'}</button>
+            </div>
+          </div>
+          <textarea class="day-input" rows="2" placeholder="VD: Khám Nhi&#10;07:00 - 11:00" oninput="updateDoctorDay(${i},${di},this.value)">${escapeHtml(val)}</textarea>
+          ${pickerOpen ? `
+          <div class="day-time-picker">
+            <input type="time" id="start_${key}">
+            <span class="time-sep">đến</span>
+            <input type="time" id="end_${key}">
+            <input type="text" id="note_${key}" placeholder="Ghi chú thêm (VD: Khám Nhi) — không bắt buộc">
+            <button type="button" class="btn btn-outline" onclick="applyTimeRange(${i},${di},'${key}')">Áp dụng vào ô</button>
+            <button type="button" class="btn btn-ghost" onclick="clearDayValue(${i},${di})">Xoá nội dung</button>
+          </div>` : ''}
+        </div>`;
     }).join('');
     card.innerHTML = `
       <div class="doctor-card-head">
@@ -650,7 +743,7 @@ function renderDoctorInputs(){
       <div class="field"><label>Chức danh / Tên</label>
         <textarea rows="2" oninput="updateDoctorTitle(${i},this.value)">${escapeHtml(doc.title)}</textarea></div>
       <div class="field"><label>Lịch làm việc theo ngày</label>
-        <div class="days-grid">${daysHtml}</div></div>
+        <div class="days-list">${daysHtml}</div></div>
       <div class="quick-off">
         <button class="chip" onclick="markOff(${i}, 2)">Thứ 4 nghỉ</button>
         <button class="chip" onclick="markOff(${i}, 6)">CN nghỉ</button>
