@@ -400,28 +400,28 @@
           <p class="hint" id="showLogoHint">Tải logo lên trước, sau đó bật/tắt để hiện hoặc ẩn logo khỏi ảnh xuất ra. Nếu không tải logo hoặc tắt tuỳ chọn này, khu vực logo sẽ được ẩn hoàn toàn khỏi thiết kế.</p>
         </div>
 
-        <div class="field"><label>Dòng nhỏ trên cùng (loại hình)</label>
+        <div class="field"><label>Dòng nhỏ trên cùng (loại hình) <span class="opt">(để trống sẽ ẩn)</span></label>
           <input type="text" id="clinicLine1" value="PHÒNG KHÁM SẢN PHỤ KHOA" oninput="render()"></div>
-        <div class="field"><label>Tên nổi bật (in đậm, màu nhấn)</label>
+        <div class="field"><label>Tên nổi bật (in đậm, màu nhấn) <span class="opt">(để trống sẽ ẩn)</span></label>
           <input type="text" id="clinicAccent" value="THIÊN PHƯỚC" oninput="render()"></div>
-        <div class="field"><label>Tên bác sĩ / chủ phòng khám</label>
+        <div class="field"><label>Tên bác sĩ / chủ phòng khám <span class="opt">(để trống sẽ ẩn)</span></label>
           <input type="text" id="clinicDoctor" value="BS. CKII. LƯƠNG PHONG NHÃ" oninput="render()"></div>
-        <div class="field"><label>Đơn vị trực thuộc (bệnh viện)</label>
+        <div class="field"><label>Đơn vị trực thuộc (bệnh viện) <span class="opt">(để trống sẽ ẩn)</span></label>
           <input type="text" id="clinicHospital" value="(BỆNH VIỆN ĐA KHOA TÂM TRÍ ĐỒNG THÁP)" oninput="render()"></div>
-        <div class="field"><label>Khẩu hiệu / tagline <span class="opt">(không bắt buộc)</span></label>
+        <div class="field"><label>Khẩu hiệu / tagline <span class="opt">(không bắt buộc, để trống sẽ ẩn)</span></label>
           <input type="text" id="clinicTagline" value="Tận tâm chăm sóc sức khoẻ mẹ và bé" oninput="render()"></div>
-        <div class="field"><label>Địa chỉ</label>
+        <div class="field"><label>Địa chỉ <span class="opt">(để trống sẽ ẩn)</span></label>
           <input type="text" id="clinicAddress" value="Đường Hùng Vương, Khóm 2, TT. Mỹ An, Tháp Mười, Đồng Tháp" oninput="render()"></div>
 
         <div class="field">
-          <label>Số điện thoại</label>
+          <label>Số điện thoại <span class="opt">(không có số nào sẽ ẩn cả dòng)</span></label>
           <div id="phoneList" style="display:flex;flex-direction:column;gap:8px;"></div>
           <button class="add-link" onclick="addPhone()">+ Thêm số điện thoại</button>
         </div>
 
-        <div class="field"><label>Tiêu đề bảng lịch</label>
+        <div class="field"><label>Tiêu đề bảng lịch <span class="opt">(để trống sẽ ẩn)</span></label>
           <input type="text" id="scheduleTitle" value="LỊCH LÀM VIỆC" oninput="render()"></div>
-        <div class="field"><label>Dòng thời gian khám (cuối trang)</label>
+        <div class="field"><label>Dòng thời gian khám (cuối trang) <span class="opt">(để trống sẽ ẩn cả dải màu)</span></label>
           <input type="text" id="workingHours" value="THỜI GIAN KHÁM VÀ TƯ VẤN: TỪ 17H00 ĐẾN 20H" oninput="render()"></div>
       </div>
     </div>
@@ -495,12 +495,12 @@
               </div>
             </div>
             <div class="poster-headtext">
-              <p class="clinic-line1"><span id="pClinicLine1Text"></span><span class="accent" id="pClinicAccent"></span></p>
+              <p class="clinic-line1" id="pClinicLine1Wrap"><span id="pClinicLine1Text"></span><span class="accent" id="pClinicAccent"></span></p>
               <p class="clinic-doctor" id="pClinicDoctor"></p>
               <p class="clinic-hospital" id="pClinicHospital"></p>
               <p class="clinic-tagline" id="pClinicTagline"></p>
-              <div class="clinic-meta">
-                <div class="meta-row">
+              <div class="clinic-meta" id="pClinicMeta">
+                <div class="meta-row" id="pAddressRow">
                   <svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z"/></svg>
                   <span id="pClinicAddress"></span>
                 </div>
@@ -520,7 +520,7 @@
             </table>
           </div>
 
-          <div class="poster-footer-wrap">
+          <div class="poster-footer-wrap" id="pFooterWrap">
             <div class="poster-footer">
               <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 10.41V6a1 1 0 0 0-2 0v7a1 1 0 0 0 .29.71l4 4a1 1 0 0 0 1.42-1.42L13 12.41z"/></svg>
               <span id="pWorkingHours"></span>
@@ -812,24 +812,53 @@ function render(){
     logoImg.style.display = 'none'; logoPh.style.display = 'none';
   }
 
-  document.getElementById('pClinicLine1Text').textContent = document.getElementById('clinicLine1').value + " ";
-  document.getElementById('pClinicAccent').textContent = document.getElementById('clinicAccent').value;
-  document.getElementById('pClinicDoctor').textContent = document.getElementById('clinicDoctor').value;
-  document.getElementById('pClinicHospital').textContent = document.getElementById('clinicHospital').value;
-  const tagline = document.getElementById('clinicTagline').value;
+  const line1 = document.getElementById('clinicLine1').value.trim();
+  const accent = document.getElementById('clinicAccent').value.trim();
+  document.getElementById('pClinicLine1Text').textContent = line1 ? line1 + " " : "";
+  document.getElementById('pClinicAccent').textContent = accent;
+  document.getElementById('pClinicLine1Wrap').style.display = (line1 || accent) ? 'block' : 'none';
+
+  const doctorName = document.getElementById('clinicDoctor').value.trim();
+  const doctorEl = document.getElementById('pClinicDoctor');
+  doctorEl.textContent = doctorName;
+  doctorEl.style.display = doctorName ? 'block' : 'none';
+
+  const hospital = document.getElementById('clinicHospital').value.trim();
+  const hospitalEl = document.getElementById('pClinicHospital');
+  hospitalEl.textContent = hospital;
+  hospitalEl.style.display = hospital ? 'block' : 'none';
+
+  const tagline = document.getElementById('clinicTagline').value.trim();
   const taglineEl = document.getElementById('pClinicTagline');
   taglineEl.textContent = tagline;
   taglineEl.style.display = tagline ? 'block' : 'none';
-  document.getElementById('pClinicAddress').textContent = document.getElementById('clinicAddress').value;
-  document.getElementById('pScheduleTitle').textContent = document.getElementById('scheduleTitle').value;
-  document.getElementById('pWorkingHours').textContent = document.getElementById('workingHours').value;
+
+  const address = document.getElementById('clinicAddress').value.trim();
+  const addressRow = document.getElementById('pAddressRow');
+  document.getElementById('pClinicAddress').textContent = address;
+  addressRow.style.display = address ? 'flex' : 'none';
+
+  const scheduleTitle = document.getElementById('scheduleTitle').value.trim();
+  const scheduleTitleEl = document.getElementById('pScheduleTitle');
+  scheduleTitleEl.textContent = scheduleTitle;
+  scheduleTitleEl.style.display = scheduleTitle ? 'block' : 'none';
+
+  const workingHours = document.getElementById('workingHours').value.trim();
+  const footerWrap = document.getElementById('pFooterWrap');
+  document.getElementById('pWorkingHours').textContent = workingHours;
+  footerWrap.style.display = workingHours ? 'flex' : 'none';
 
   const phonesWrap = document.getElementById('pClinicPhones');
-  phonesWrap.innerHTML = state.phones.filter(p=>p.number).map(p=>`
+  const visiblePhones = state.phones.filter(p=>p.number);
+  phonesWrap.innerHTML = visiblePhones.map(p=>`
     <span class="phone-item">
       <svg viewBox="0 0 24 24"><path d="M6.6 10.8c1.4 2.8 3.7 5.1 6.5 6.5l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.5.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4.2c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.5.1.4 0 .8-.2 1.1L6.6 10.8z"/></svg>
       ${p.label ? escapeHtml(p.label)+': ' : ''}<b>${escapeHtml(p.number)}</b>
     </span>`).join('');
+  phonesWrap.style.display = visiblePhones.length ? 'flex' : 'none';
+
+  // Whole meta block (address + phones) collapses if neither has content, avoiding a stray empty gap
+  document.getElementById('pClinicMeta').style.display = (address || visiblePhones.length) ? 'flex' : 'none';
 
   const headRow = document.getElementById('pTableHeadRow');
   let headHtml = `<th class="first-col"></th>`;
