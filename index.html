@@ -152,26 +152,41 @@
   .doctor-card + .doctor-card{margin-top:10px;}
   .doctor-card-head{display:flex;justify-content:space-between;align-items:center;}
   .doctor-card-head .tag{font-size:11px;font-weight:700;color:var(--p1);background:#fbf1da;padding:3px 9px;border-radius:20px;}
-  .days-list{display:flex;flex-direction:column;gap:9px;}
-  .day-row{border:1px solid var(--panel-line);border-radius:9px;background:#fffdf9;padding:9px 10px 10px;}
-  .day-row.off{background:#f3ede0;}
-  .day-row-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px;flex-wrap:wrap;}
-  .day-name{font-size:11.5px;font-weight:800;color:var(--ink);text-transform:uppercase;letter-spacing:.03em;flex-shrink:0;}
-  .day-quick-chips{display:flex;gap:5px;flex-wrap:wrap;flex:1;justify-content:flex-end;}
-  .mini-chip{font-size:10px;padding:4px 9px;border-radius:20px;border:1px solid #ddd2b3;background:#fff;cursor:pointer;color:var(--text-mute);font-weight:700;white-space:nowrap;}
-  .mini-chip:hover{border-color:var(--p2);color:var(--p1);}
-  .mini-chip.clock{color:var(--p1);border-color:var(--p3);background:#fbf3df;}
-  .day-input{width:100%;min-height:46px;padding:8px 9px;border:1px solid #ddd2b3;border-radius:7px;font-family:inherit;font-size:13px;background:#fff;color:var(--text-dark);resize:vertical;line-height:1.45;}
-  .day-input:focus{outline:none;border-color:var(--p2);box-shadow:0 0 0 3px rgba(var(--p2-rgb),.15);}
-  .day-row.off .day-input{background:#f3ede0;color:var(--text-mute);}
-  .day-time-picker{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin-top:8px;padding:9px;border-radius:7px;background:#fbf7ea;border:1px dashed var(--p3);}
-  .day-time-picker input[type=time]{width:auto;padding:6px 7px;font-size:12.5px;flex:0 0 auto;}
-  .day-time-picker input[type=text]{flex:1 1 130px;padding:6px 8px;font-size:12.5px;}
-  .time-sep{font-size:12px;color:var(--text-mute);font-weight:700;}
-  .day-time-picker .btn{padding:6px 11px;font-size:11.5px;flex-shrink:0;}
   .quick-off{display:flex;gap:6px;flex-wrap:wrap;}
   .chip{font-size:10.5px;padding:4px 9px;border-radius:20px;border:1px solid #ddd2b3;background:#fff;cursor:pointer;color:var(--text-mute);font-weight:600;}
   .chip:hover{border-color:var(--p2);color:var(--p1);}
+  .chip.active{background:var(--p2);border-color:var(--p2);color:#fff;}
+
+  /* ---- Per-day schedule editor (wide, expandable rows) ---- */
+  .day-list{display:flex;flex-direction:column;gap:7px;}
+  .day-row{border:1px solid var(--panel-line);border-radius:10px;background:#fffdf9;overflow:hidden;transition:border-color .15s ease;}
+  .day-row.expanded{border-color:var(--p2);box-shadow:0 2px 8px rgba(var(--p2-rgb),.1);}
+  .day-row-head{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;user-select:none;}
+  .day-row-head .day-name{font-weight:800;font-size:12px;color:var(--ink);width:58px;flex-shrink:0;letter-spacing:.02em;}
+  .day-row-head .day-preview{flex:1;font-size:12px;color:var(--text-mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .day-row-head .day-preview.is-off{color:var(--red);font-weight:700;}
+  .day-row-head .day-preview.is-empty{font-style:italic;color:#c9bd9c;}
+  .day-row-head .off-dot{width:7px;height:7px;border-radius:50%;background:var(--red);flex-shrink:0;display:none;}
+  .day-row-head .off-dot.show{display:block;}
+  .day-row-head .chev-mini{transition:transform .2s ease;color:var(--text-mute);font-size:11px;flex-shrink:0;transform:rotate(-90deg);}
+  .day-row.expanded .day-row-head .chev-mini{transform:rotate(0deg);}
+  .day-row-body{display:none;flex-direction:column;gap:11px;padding:0 12px 14px;border-top:1px dashed var(--panel-line);margin-top:1px;padding-top:11px;}
+  .day-row.expanded .day-row-body{display:flex;}
+  .day-row-body .field-label{font-size:10.5px;font-weight:700;color:var(--text-mute);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;}
+  .day-row-body input[type=text]{font-size:13px;padding:8px 10px;}
+  .day-off-toggle{display:flex;align-items:center;gap:9px;font-size:12.5px;font-weight:700;color:var(--red);cursor:pointer;user-select:none;background:#fbeeec;border:1px solid #ecd7d4;border-radius:8px;padding:8px 10px;}
+  .day-off-toggle input[type=checkbox]{width:16px;height:16px;accent-color:var(--red);cursor:pointer;margin:0;flex-shrink:0;}
+  .time-quick-chips{display:flex;gap:6px;flex-wrap:wrap;}
+  .time-manual{display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+  .time-manual .t-sep{color:var(--text-mute);font-size:12px;font-weight:600;}
+  .time-manual input[type=time]{padding:7px 8px;border:1px solid #ddd2b3;border-radius:8px;font-family:inherit;font-size:13px;background:#fffdf9;color:var(--text-dark);flex:1;min-width:90px;}
+  .time-manual input[type=time]:focus{outline:none;border-color:var(--p2);box-shadow:0 0 0 3px rgba(var(--p2-rgb),.15);}
+  .time-clear-btn{background:transparent;border:1px solid #ecd7d4;color:#a44;border-radius:7px;padding:6px 9px;font-size:11px;cursor:pointer;font-weight:600;flex-shrink:0;}
+  .time-clear-btn:hover{background:#fbeeec;}
+  .day-cell-preview{font-size:11px;color:var(--text-mute);background:#f5eed9;border-radius:7px;padding:6px 9px;white-space:pre-line;line-height:1.4;}
+  .day-cell-preview b{color:var(--ink);}
+  .week-quick-panel{border:1px dashed var(--p3);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;background:#fdfaf1;}
+  .week-quick-panel .field-label{font-size:10.5px;font-weight:700;color:var(--p1);text-transform:uppercase;letter-spacing:.04em;}
 
   .hint{font-size:11.5px;color:var(--text-mute);line-height:1.5;margin:0;}
 
@@ -305,12 +320,12 @@
     .stage{padding:20px 10px calc(96px + env(safe-area-inset-bottom));}
     /* Prevent iOS auto-zoom on focus: inputs need >=16px font */
     input[type=text], input[type=tel], textarea, select{font-size:16px;padding:10px 11px;}
-    .day-input{font-size:16px;padding:9px 10px;}
-    .day-time-picker input[type=time]{font-size:16px;}
-    .day-time-picker input[type=text]{font-size:16px;}
+    input[type=time]{font-size:16px;}
     .icon-btn{width:38px;height:38px;font-size:16px;}
     .btn{padding:11px 14px;font-size:13px;}
     .chip{padding:6px 11px;font-size:11px;}
+    .day-row-head{padding:12px;}
+    .day-row-head .day-name{width:52px;}
   }
 
   /* Small phones (e.g. iPhone SE, small Android) */
@@ -320,18 +335,18 @@
     h1.title{font-size:17px;}
     .theme-grid{grid-template-columns:repeat(2,1fr);gap:8px;}
     .row2{grid-template-columns:1fr;}
-    .day-quick-chips{justify-content:flex-start;}
     .doctor-card{padding:10px;}
     .section-head{padding:12px 13px;}
     .section-head h2{font-size:12.5px;}
     .mobile-nav .mn-title{font-size:12px;}
     .mobile-nav button{padding:7px 10px;font-size:11px;}
+    .time-manual input[type=time]{min-width:76px;}
   }
 
   /* Very narrow phones */
   @media (max-width: 340px){
     .theme-swatch .chip-name{font-size:9px;}
-    .mini-chip{font-size:9.5px;padding:3px 7px;}
+    .day-row-head .day-name{width:46px;font-size:11px;}
   }
 
   /* Landscape phones: reclaim vertical space in preview */
@@ -400,28 +415,28 @@
           <p class="hint" id="showLogoHint">Tải logo lên trước, sau đó bật/tắt để hiện hoặc ẩn logo khỏi ảnh xuất ra. Nếu không tải logo hoặc tắt tuỳ chọn này, khu vực logo sẽ được ẩn hoàn toàn khỏi thiết kế.</p>
         </div>
 
-        <div class="field"><label>Dòng nhỏ trên cùng (loại hình) <span class="opt">(để trống sẽ ẩn)</span></label>
+        <div class="field"><label>Dòng nhỏ trên cùng (loại hình)</label>
           <input type="text" id="clinicLine1" value="PHÒNG KHÁM SẢN PHỤ KHOA" oninput="render()"></div>
-        <div class="field"><label>Tên nổi bật (in đậm, màu nhấn) <span class="opt">(để trống sẽ ẩn)</span></label>
+        <div class="field"><label>Tên nổi bật (in đậm, màu nhấn)</label>
           <input type="text" id="clinicAccent" value="THIÊN PHƯỚC" oninput="render()"></div>
-        <div class="field"><label>Tên bác sĩ / chủ phòng khám <span class="opt">(để trống sẽ ẩn)</span></label>
+        <div class="field"><label>Tên bác sĩ / chủ phòng khám</label>
           <input type="text" id="clinicDoctor" value="BS. CKII. LƯƠNG PHONG NHÃ" oninput="render()"></div>
-        <div class="field"><label>Đơn vị trực thuộc (bệnh viện) <span class="opt">(để trống sẽ ẩn)</span></label>
+        <div class="field"><label>Đơn vị trực thuộc (bệnh viện)</label>
           <input type="text" id="clinicHospital" value="(BỆNH VIỆN ĐA KHOA TÂM TRÍ ĐỒNG THÁP)" oninput="render()"></div>
-        <div class="field"><label>Khẩu hiệu / tagline <span class="opt">(không bắt buộc, để trống sẽ ẩn)</span></label>
+        <div class="field"><label>Khẩu hiệu / tagline <span class="opt">(không bắt buộc)</span></label>
           <input type="text" id="clinicTagline" value="Tận tâm chăm sóc sức khoẻ mẹ và bé" oninput="render()"></div>
-        <div class="field"><label>Địa chỉ <span class="opt">(để trống sẽ ẩn)</span></label>
+        <div class="field"><label>Địa chỉ</label>
           <input type="text" id="clinicAddress" value="Đường Hùng Vương, Khóm 2, TT. Mỹ An, Tháp Mười, Đồng Tháp" oninput="render()"></div>
 
         <div class="field">
-          <label>Số điện thoại <span class="opt">(không có số nào sẽ ẩn cả dòng)</span></label>
+          <label>Số điện thoại</label>
           <div id="phoneList" style="display:flex;flex-direction:column;gap:8px;"></div>
           <button class="add-link" onclick="addPhone()">+ Thêm số điện thoại</button>
         </div>
 
-        <div class="field"><label>Tiêu đề bảng lịch <span class="opt">(để trống sẽ ẩn)</span></label>
+        <div class="field"><label>Tiêu đề bảng lịch</label>
           <input type="text" id="scheduleTitle" value="LỊCH LÀM VIỆC" oninput="render()"></div>
-        <div class="field"><label>Dòng thời gian khám (cuối trang) <span class="opt">(để trống sẽ ẩn cả dải màu)</span></label>
+        <div class="field"><label>Dòng thời gian khám (cuối trang)</label>
           <input type="text" id="workingHours" value="THỜI GIAN KHÁM VÀ TƯ VẤN: TỪ 17H00 ĐẾN 20H" oninput="render()"></div>
       </div>
     </div>
@@ -433,7 +448,7 @@
         <span class="chev">▾</span>
       </div>
       <div class="section-body">
-        <p class="hint">Mỗi bác sĩ có 7 dòng tương ứng Thứ 2 → Chủ nhật, ô nhập đã mở rộng và cho xuống dòng để ghi chi tiết hơn (VD: loại khám + khung giờ). Bấm chip "Sáng / Chiều / Tối / Cả ngày / Nghỉ" để điền nhanh khung giờ mẫu, hoặc bấm "🕒 Giờ tuỳ chỉnh" để tự chọn giờ bắt đầu — kết thúc theo ý muốn. Ô ghi đúng chữ "NGHỈ" sẽ tự động hiển thị dạng nhãn đỏ nổi bật.</p>
+        <p class="hint">Bấm vào từng ngày để mở rộng khung nhập: đặt ngày nghỉ, ghi nội dung ca khám và chọn khung giờ làm việc — chọn nhanh theo mẫu (Sáng/Chiều/Tối/Cả ngày) hoặc chọn thủ công theo giờ tuỳ ý.</p>
         <div id="doctorList"></div>
         <button class="btn btn-outline" onclick="addDoctor()" style="align-self:flex-start;">+ Thêm bác sĩ</button>
       </div>
@@ -495,12 +510,12 @@
               </div>
             </div>
             <div class="poster-headtext">
-              <p class="clinic-line1" id="pClinicLine1Wrap"><span id="pClinicLine1Text"></span><span class="accent" id="pClinicAccent"></span></p>
+              <p class="clinic-line1"><span id="pClinicLine1Text"></span><span class="accent" id="pClinicAccent"></span></p>
               <p class="clinic-doctor" id="pClinicDoctor"></p>
               <p class="clinic-hospital" id="pClinicHospital"></p>
               <p class="clinic-tagline" id="pClinicTagline"></p>
-              <div class="clinic-meta" id="pClinicMeta">
-                <div class="meta-row" id="pAddressRow">
+              <div class="clinic-meta">
+                <div class="meta-row">
                   <svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z"/></svg>
                   <span id="pClinicAddress"></span>
                 </div>
@@ -520,7 +535,7 @@
             </table>
           </div>
 
-          <div class="poster-footer-wrap" id="pFooterWrap">
+          <div class="poster-footer-wrap">
             <div class="poster-footer">
               <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 10.41V6a1 1 0 0 0-2 0v7a1 1 0 0 0 .29.71l4 4a1 1 0 0 0 1.42-1.42L13 12.41z"/></svg>
               <span id="pWorkingHours"></span>
@@ -546,18 +561,17 @@ const THEMES = [
 ];
 let currentThemeIndex = 0;
 
-/* Which doctor+day time-picker is currently expanded, e.g. "1_2" = doctor index 1, day index 2 */
-let dayPickerOpen = {};
+/* Quick time-range presets offered for fast selection on any day */
+const TIME_PRESETS = [
+  {key:"sang",   label:"Sáng",     from:"07:00", to:"11:00"},
+  {key:"chieu",  label:"Chiều",    from:"13:00", to:"17:00"},
+  {key:"toi",    label:"Tối",      from:"17:00", to:"20:00"},
+  {key:"caday",  label:"Cả ngày",  from:"07:00", to:"17:00"}
+];
 
-/* Quick-select shift presets — inserted instantly when a chip is clicked.
-   Times reflect common clinic shift patterns and can always be overridden manually. */
-const DAY_PRESETS = {
-  morning:  {text:"07:00 - 11:00"},
-  afternoon:{text:"13:00 - 17:00"},
-  evening:  {text:"17:00 - 20:00"},
-  full:     {text:"07:00 - 17:00"},
-  off:      {text:"NGHỈ"}
-};
+function newDay(overrides){
+  return Object.assign({off:false, label:"", from:"", to:"", expanded:false}, overrides || {});
+}
 
 let state = {
   logo: null,
@@ -568,8 +582,14 @@ let state = {
   ],
   highlightDays: [2, 6],
   doctors: [
-    {title:"THS.BS\nHẬU", schedule:["Khám Nhi","Khám Nhi","NGHỈ","Khám Nhi","Khám Nhi","Khám Nhi","NGHỈ"]},
-    {title:"BS.CK2\nNHÃ", schedule:["Khám Sản","Khám Sản","NGHỈ","Khám Sản","Khám Sản","Khám Sản","NGHỈ"]}
+    {title:"THS.BS\nHẬU", schedule:[
+      newDay({label:"Khám Nhi"}), newDay({label:"Khám Nhi"}), newDay({off:true}),
+      newDay({label:"Khám Nhi"}), newDay({label:"Khám Nhi"}), newDay({label:"Khám Nhi"}), newDay({off:true})
+    ]},
+    {title:"BS.CK2\nNHÃ", schedule:[
+      newDay({label:"Khám Sản"}), newDay({label:"Khám Sản"}), newDay({off:true}),
+      newDay({label:"Khám Sản"}), newDay({label:"Khám Sản"}), newDay({label:"Khám Sản"}), newDay({off:true})
+    ]}
   ]
 };
 
@@ -647,56 +667,97 @@ function renderPhoneInputs(){
   });
 }
 
-function addDoctor(){ state.doctors.push({title:"BS.\nMỚI", schedule:["","","","","","",""]}); renderDoctorInputs(); render(); }
+function addDoctor(){
+  state.doctors.push({title:"BS.\nMỚI", schedule:[newDay(),newDay(),newDay(),newDay(),newDay(),newDay(),newDay()]});
+  renderDoctorInputs(); render();
+}
 function removeDoctor(i){ state.doctors.splice(i,1); renderDoctorInputs(); render(); }
 function updateDoctorTitle(i, val){ state.doctors[i].title = val; render(); }
-function updateDoctorDay(i, dayIdx, val){ state.doctors[i].schedule[dayIdx] = val; render(); }
-function markOff(i, dayIdx){ state.doctors[i].schedule[dayIdx] = "NGHỈ"; renderDoctorInputs(); render(); }
-function markAllWork(i, text){
-  state.doctors[i].schedule = state.doctors[i].schedule.map(v => v === "NGHỈ" || v === "" ? text : v);
-  renderDoctorInputs(); render();
-}
 
-/* ---- Quick-select / manual time range for a single day of a single doctor ---- */
-function setDayPreset(docIdx, dayIdx, presetKey){
-  const preset = DAY_PRESETS[presetKey];
-  if(!preset) return;
-  state.doctors[docIdx].schedule[dayIdx] = preset.text;
-  const key = `${docIdx}_${dayIdx}`;
-  dayPickerOpen[key] = false;
-  renderDoctorInputs(); render();
-}
-
-function clearDayValue(docIdx, dayIdx){
-  state.doctors[docIdx].schedule[dayIdx] = "";
-  renderDoctorInputs(); render();
-}
-
-function toggleDayPicker(key){
-  dayPickerOpen[key] = !dayPickerOpen[key];
+/* ---- Per-day field updates ---- */
+function toggleDayExpand(i, di){
+  const d = state.doctors[i].schedule[di];
+  d.expanded = !d.expanded;
   renderDoctorInputs();
 }
-
-function applyTimeRange(docIdx, dayIdx, key){
-  const startEl = document.getElementById('start_'+key);
-  const endEl = document.getElementById('end_'+key);
-  const noteEl = document.getElementById('note_'+key);
-  const start = startEl ? startEl.value : "";
-  const end = endEl ? endEl.value : "";
-  const note = noteEl ? noteEl.value.trim() : "";
-
-  let text = "";
-  if(start && end) text = `${start} - ${end}`;
-  else if(start) text = start;
-  else if(end) text = end;
-
-  if(note) text = text ? `${text}\n${note}` : note;
-
-  if(!text){ return; } // nothing entered — leave the cell untouched
-
-  state.doctors[docIdx].schedule[dayIdx] = text;
-  dayPickerOpen[key] = false;
+function toggleDayOff(i, di, checked){
+  const d = state.doctors[i].schedule[di];
+  d.off = checked;
   renderDoctorInputs(); render();
+}
+function updateDayLabel(i, di, val){
+  state.doctors[i].schedule[di].label = val;
+  refreshDayPreview(i, di); render();
+}
+function applyDayPreset(i, di, key){
+  const preset = TIME_PRESETS.find(p=>p.key===key);
+  if(!preset) return;
+  const d = state.doctors[i].schedule[di];
+  d.off = false; d.from = preset.from; d.to = preset.to;
+  renderDoctorInputs(); render();
+}
+function updateDayTime(i, di, field, val){
+  state.doctors[i].schedule[di][field] = val;
+  refreshDayPreview(i, di); render();
+}
+function clearDayTime(i, di){
+  const d = state.doctors[i].schedule[di];
+  d.from = ""; d.to = "";
+  renderDoctorInputs(); render();
+}
+
+/* Update only the small live-preview text of one row without rebuilding the whole
+   panel, so the person can keep typing/selecting time without losing focus. */
+function refreshDayPreview(i, di){
+  const row = document.querySelector(`.day-row[data-doc="${i}"][data-day="${di}"]`);
+  if(!row) return;
+  const d = state.doctors[i].schedule[di];
+  const headPreview = row.querySelector('.day-row-head .day-preview');
+  if(headPreview){
+    const text = dayCellText(d).replace(/\n/g,' · ');
+    headPreview.textContent = d.off ? 'NGHỈ' : (text || 'Chưa có nội dung');
+    headPreview.classList.toggle('is-off', !!d.off);
+    headPreview.classList.toggle('is-empty', !d.off && !text);
+  }
+  const bodyPreview = row.querySelector('.day-cell-preview b');
+  if(bodyPreview) bodyPreview.textContent = dayCellText(d) || '(trống)';
+}
+
+function markOff(i, dayIdx){
+  const d = state.doctors[i].schedule[dayIdx];
+  d.off = true;
+  renderDoctorInputs(); render();
+}
+function markAllWork(i, text){
+  state.doctors[i].schedule.forEach(d=>{
+    if(!d.off && !d.label && !d.from && !d.to) d.label = text;
+  });
+  renderDoctorInputs(); render();
+}
+
+/* ---- Apply one time range to every working (non-off) day of a doctor at once ---- */
+function applyWeekPreset(i, key){
+  const preset = TIME_PRESETS.find(p=>p.key===key);
+  if(!preset) return;
+  state.doctors[i].schedule.forEach(d=>{ if(!d.off){ d.from = preset.from; d.to = preset.to; } });
+  renderDoctorInputs(); render();
+}
+function applyWeekManual(i){
+  const from = document.getElementById(`weekFrom-${i}`).value;
+  const to = document.getElementById(`weekTo-${i}`).value;
+  if(!from || !to) return;
+  state.doctors[i].schedule.forEach(d=>{ if(!d.off){ d.from = from; d.to = to; } });
+  renderDoctorInputs(); render();
+}
+
+/* Compose the final text shown in a schedule cell from its structured day data */
+function dayCellText(d){
+  if(!d) return "";
+  if(d.off) return "NGHỈ";
+  const parts = [];
+  if(d.label && d.label.trim()) parts.push(d.label.trim());
+  if(d.from && d.to) parts.push(`${d.from} - ${d.to}`);
+  return parts.join('\n');
 }
 
 function renderDoctorInputs(){
@@ -705,36 +766,58 @@ function renderDoctorInputs(){
   state.doctors.forEach((doc, i)=>{
     const card = document.createElement('div');
     card.className = 'doctor-card';
-    const daysHtml = DAYS.map((d, di)=>{
-      const val = doc.schedule[di] || "";
-      const isOff = val.trim().toUpperCase() === "NGHỈ";
-      const key = `${i}_${di}`;
-      const pickerOpen = !!dayPickerOpen[key];
+
+    const daysHtml = DAYS.map((dname, di)=>{
+      const d = doc.schedule[di];
+      const previewRaw = dayCellText(d).replace(/\n/g,' · ');
+      const previewText = d.off ? 'NGHỈ' : (previewRaw || 'Chưa có nội dung');
+      const previewClass = d.off ? 'is-off' : (previewRaw ? '' : 'is-empty');
+      const chipsHtml = TIME_PRESETS.map(p=>
+        `<button type="button" class="chip ${(d.from===p.from && d.to===p.to)?'active':''}" onclick="applyDayPreset(${i},${di},'${p.key}')">${p.label} <span style="opacity:.7;">${p.from}–${p.to}</span></button>`
+      ).join('');
+
       return `
-        <div class="day-row ${isOff?'off':''}">
-          <div class="day-row-head">
-            <span class="day-name">${d}</span>
-            <div class="day-quick-chips">
-              <button type="button" class="mini-chip" onclick="setDayPreset(${i},${di},'morning')" title="07:00 - 11:00">Sáng</button>
-              <button type="button" class="mini-chip" onclick="setDayPreset(${i},${di},'afternoon')" title="13:00 - 17:00">Chiều</button>
-              <button type="button" class="mini-chip" onclick="setDayPreset(${i},${di},'evening')" title="17:00 - 20:00">Tối</button>
-              <button type="button" class="mini-chip" onclick="setDayPreset(${i},${di},'full')" title="07:00 - 17:00">Cả ngày</button>
-              <button type="button" class="mini-chip" onclick="setDayPreset(${i},${di},'off')">Nghỉ</button>
-              <button type="button" class="mini-chip clock" onclick="toggleDayPicker('${key}')">${pickerOpen ? '✕ Đóng' : '🕒 Giờ tuỳ chỉnh'}</button>
+      <div class="day-row ${d.expanded?'expanded':''}" data-doc="${i}" data-day="${di}">
+        <div class="day-row-head" onclick="toggleDayExpand(${i},${di})">
+          <span class="off-dot ${d.off?'show':''}"></span>
+          <span class="day-name">${dname}</span>
+          <span class="day-preview ${previewClass}">${escapeHtml(previewText)}</span>
+          <span class="chev-mini">▾</span>
+        </div>
+        <div class="day-row-body">
+          <label class="day-off-toggle">
+            <input type="checkbox" ${d.off?'checked':''} onclick="event.stopPropagation()" onchange="toggleDayOff(${i},${di},this.checked)">
+            <span>Đánh dấu ngày nghỉ</span>
+          </label>
+
+          ${d.off ? '' : `
+          <div class="field">
+            <div class="field-label">Nội dung ca khám <span class="opt" style="text-transform:none;">(không bắt buộc)</span></div>
+            <input type="text" placeholder="VD: Khám Nhi, Khám Sản..." value="${escapeAttr(d.label)}" onclick="event.stopPropagation()" oninput="updateDayLabel(${i},${di},this.value)">
+          </div>
+
+          <div class="field">
+            <div class="field-label">Khung giờ làm việc — chọn nhanh</div>
+            <div class="time-quick-chips" onclick="event.stopPropagation()">${chipsHtml}</div>
+          </div>
+
+          <div class="field">
+            <div class="field-label">Hoặc chọn thủ công</div>
+            <div class="time-manual" onclick="event.stopPropagation()">
+              <span class="t-sep">Từ</span>
+              <input type="time" value="${escapeAttr(d.from)}" onchange="updateDayTime(${i},${di},'from',this.value)">
+              <span class="t-sep">đến</span>
+              <input type="time" value="${escapeAttr(d.to)}" onchange="updateDayTime(${i},${di},'to',this.value)">
+              <button type="button" class="time-clear-btn" onclick="clearDayTime(${i},${di})">Xoá giờ</button>
             </div>
           </div>
-          <textarea class="day-input" rows="2" placeholder="VD: Khám Nhi&#10;07:00 - 11:00" oninput="updateDoctorDay(${i},${di},this.value)">${escapeHtml(val)}</textarea>
-          ${pickerOpen ? `
-          <div class="day-time-picker">
-            <input type="time" id="start_${key}">
-            <span class="time-sep">đến</span>
-            <input type="time" id="end_${key}">
-            <input type="text" id="note_${key}" placeholder="Ghi chú thêm (VD: Khám Nhi) — không bắt buộc">
-            <button type="button" class="btn btn-outline" onclick="applyTimeRange(${i},${di},'${key}')">Áp dụng vào ô</button>
-            <button type="button" class="btn btn-ghost" onclick="clearDayValue(${i},${di})">Xoá nội dung</button>
-          </div>` : ''}
-        </div>`;
+
+          <div class="day-cell-preview">Hiển thị trên lịch: <b>${escapeHtml(dayCellText(d) || '(trống)')}</b></div>
+          `}
+        </div>
+      </div>`;
     }).join('');
+
     card.innerHTML = `
       <div class="doctor-card-head">
         <span class="tag">Bác sĩ ${i+1}</span>
@@ -742,12 +825,28 @@ function renderDoctorInputs(){
       </div>
       <div class="field"><label>Chức danh / Tên</label>
         <textarea rows="2" oninput="updateDoctorTitle(${i},this.value)">${escapeHtml(doc.title)}</textarea></div>
+
       <div class="field"><label>Lịch làm việc theo ngày</label>
-        <div class="days-list">${daysHtml}</div></div>
+        <div class="day-list">${daysHtml}</div></div>
+
       <div class="quick-off">
         <button class="chip" onclick="markOff(${i}, 2)">Thứ 4 nghỉ</button>
         <button class="chip" onclick="markOff(${i}, 6)">CN nghỉ</button>
         <button class="chip" onclick="markAllWork(${i}, 'Khám')">Điền "Khám" ô trống</button>
+      </div>
+
+      <div class="week-quick-panel">
+        <div class="field-label">Áp dụng nhanh khung giờ cho cả tuần (các ngày đang làm việc)</div>
+        <div class="time-quick-chips">
+          ${TIME_PRESETS.map(p=>`<button type="button" class="chip" onclick="applyWeekPreset(${i},'${p.key}')">${p.label} <span style="opacity:.7;">${p.from}–${p.to}</span></button>`).join('')}
+        </div>
+        <div class="time-manual">
+          <span class="t-sep">Từ</span>
+          <input type="time" id="weekFrom-${i}">
+          <span class="t-sep">đến</span>
+          <input type="time" id="weekTo-${i}">
+          <button type="button" class="btn btn-outline" style="padding:7px 10px;font-size:11.5px;" onclick="applyWeekManual(${i})">Áp dụng cho cả tuần</button>
+        </div>
       </div>`;
     wrap.appendChild(card);
   });
@@ -812,53 +911,24 @@ function render(){
     logoImg.style.display = 'none'; logoPh.style.display = 'none';
   }
 
-  const line1 = document.getElementById('clinicLine1').value.trim();
-  const accent = document.getElementById('clinicAccent').value.trim();
-  document.getElementById('pClinicLine1Text').textContent = line1 ? line1 + " " : "";
-  document.getElementById('pClinicAccent').textContent = accent;
-  document.getElementById('pClinicLine1Wrap').style.display = (line1 || accent) ? 'block' : 'none';
-
-  const doctorName = document.getElementById('clinicDoctor').value.trim();
-  const doctorEl = document.getElementById('pClinicDoctor');
-  doctorEl.textContent = doctorName;
-  doctorEl.style.display = doctorName ? 'block' : 'none';
-
-  const hospital = document.getElementById('clinicHospital').value.trim();
-  const hospitalEl = document.getElementById('pClinicHospital');
-  hospitalEl.textContent = hospital;
-  hospitalEl.style.display = hospital ? 'block' : 'none';
-
-  const tagline = document.getElementById('clinicTagline').value.trim();
+  document.getElementById('pClinicLine1Text').textContent = document.getElementById('clinicLine1').value + " ";
+  document.getElementById('pClinicAccent').textContent = document.getElementById('clinicAccent').value;
+  document.getElementById('pClinicDoctor').textContent = document.getElementById('clinicDoctor').value;
+  document.getElementById('pClinicHospital').textContent = document.getElementById('clinicHospital').value;
+  const tagline = document.getElementById('clinicTagline').value;
   const taglineEl = document.getElementById('pClinicTagline');
   taglineEl.textContent = tagline;
   taglineEl.style.display = tagline ? 'block' : 'none';
-
-  const address = document.getElementById('clinicAddress').value.trim();
-  const addressRow = document.getElementById('pAddressRow');
-  document.getElementById('pClinicAddress').textContent = address;
-  addressRow.style.display = address ? 'flex' : 'none';
-
-  const scheduleTitle = document.getElementById('scheduleTitle').value.trim();
-  const scheduleTitleEl = document.getElementById('pScheduleTitle');
-  scheduleTitleEl.textContent = scheduleTitle;
-  scheduleTitleEl.style.display = scheduleTitle ? 'block' : 'none';
-
-  const workingHours = document.getElementById('workingHours').value.trim();
-  const footerWrap = document.getElementById('pFooterWrap');
-  document.getElementById('pWorkingHours').textContent = workingHours;
-  footerWrap.style.display = workingHours ? 'flex' : 'none';
+  document.getElementById('pClinicAddress').textContent = document.getElementById('clinicAddress').value;
+  document.getElementById('pScheduleTitle').textContent = document.getElementById('scheduleTitle').value;
+  document.getElementById('pWorkingHours').textContent = document.getElementById('workingHours').value;
 
   const phonesWrap = document.getElementById('pClinicPhones');
-  const visiblePhones = state.phones.filter(p=>p.number);
-  phonesWrap.innerHTML = visiblePhones.map(p=>`
+  phonesWrap.innerHTML = state.phones.filter(p=>p.number).map(p=>`
     <span class="phone-item">
       <svg viewBox="0 0 24 24"><path d="M6.6 10.8c1.4 2.8 3.7 5.1 6.5 6.5l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.5.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4.2c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.5.1.4 0 .8-.2 1.1L6.6 10.8z"/></svg>
       ${p.label ? escapeHtml(p.label)+': ' : ''}<b>${escapeHtml(p.number)}</b>
     </span>`).join('');
-  phonesWrap.style.display = visiblePhones.length ? 'flex' : 'none';
-
-  // Whole meta block (address + phones) collapses if neither has content, avoiding a stray empty gap
-  document.getElementById('pClinicMeta').style.display = (address || visiblePhones.length) ? 'flex' : 'none';
 
   const headRow = document.getElementById('pTableHeadRow');
   let headHtml = `<th class="first-col"></th>`;
@@ -870,11 +940,11 @@ function render(){
 
   const body = document.getElementById('pTableBody');
   body.innerHTML = state.doctors.map(doc=>{
-    let cells = doc.schedule.map((val,i)=>{
-      const off = state.highlightDays.includes(i);
-      const isOffText = (val||"").trim().toUpperCase() === "NGHỈ";
-      const content = isOffText ? `<span class="pill-off">NGHỈ</span>` : nl2br(val);
-      return `<td class="${off?'off-col':''}">${content}</td>`;
+    let cells = doc.schedule.map((d,i)=>{
+      const highlightCol = state.highlightDays.includes(i);
+      const text = dayCellText(d);
+      const content = d.off ? `<span class="pill-off">NGHỈ</span>` : nl2br(text);
+      return `<td class="${highlightCol?'off-col':''}">${content}</td>`;
     }).join('');
     return `<tr><th>${nl2br(doc.title)}</th>${cells}</tr>`;
   }).join('');
